@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+
 #include "Window.h"
 #include "PositionDispatcher.h"
 #include "ManualThread.h"
@@ -18,9 +19,6 @@ public:
 signals:
 
    void publish();
-   void start_thread();
-   void stop_thread();
-
 
 public slots:
 
@@ -37,6 +35,7 @@ public slots:
 private:
 
    Window *win;
+   QMutex mutex;
 
 };
 

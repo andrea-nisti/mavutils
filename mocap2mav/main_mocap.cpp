@@ -7,19 +7,23 @@
 #include "ManualThread.h"
 #include "global.h"
 #include "CommanderThread.h"
+#include <QThread>
+#include "MainControl.h"
+#include "Commander.h"
 
-
-CommanderThread commanderT;
 int main(int argc, char *argv[])
 {
 
     QApplication a(argc, argv);
     //NatNetReceiver mocap;
     //PositionDispatcher positionDispatcher;
-    ManualControl *setPointer = new ManualControl();
-    AutoControl *autoC = new AutoControl();
+    MainControl controller;
+    //Commander commander;
+    //ManualControl manual;
 
-    commanderT.startMe();
+    qDebug() << "main from: " << QThread::currentThreadId();
+
+
 
 //    QObject::connect(&mocap, SIGNAL(dataUpdate()), &positionDispatcher, SLOT(sendPosition()));
 //    QObject::connect(&positionDispatcher, SIGNAL(finished()), &a, SLOT(quit()));

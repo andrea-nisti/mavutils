@@ -120,6 +120,17 @@ public:
         return std::atan2(2*(_qw*_qz+_qx*_qy), 1-2*(_qy*_qy + _qz*_qz));
     }
 
+    // OPERATORS
+
+    void operator=(MavState &m){
+
+        this->setPosition(m.x(),m.y(),m.z());
+
+        this->setYaw(m.yaw());
+
+        //XXX TODO orientation quaternion
+
+    }
 
 
     // MOCAP

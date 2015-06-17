@@ -20,7 +20,9 @@ SOURCES += \
     ManualControl.cpp \
     AutoControl.cpp \
     ManualThread.cpp \
-    CommanderThread.cpp
+    CommanderThread.cpp \
+    MainControl.cpp \
+    Commander.cpp
 
 
 HEADERS += \
@@ -33,4 +35,6 @@ HEADERS += \
     utils.h \
     AutoControl.h \
     ManualThread.h \
-    CommanderThread.h
+    CommanderThread.h \
+    MainControl.h \
+    Commander.h

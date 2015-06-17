@@ -1,9 +1,8 @@
 #include "ManualThread.h"
-
-
-#include<QDebug>
+#include "unistd.h"
+#include <QDebug>
 #include "MavState.h"
-#include<QTime>
+#include <QTime>
 #include <cmath>
 #include "global.h"
 #define PI 3.141592653589
@@ -23,18 +22,19 @@ int r = 1; //Hz
 int milli;
 double x_sp,y_sp,yaw;
 void ManualThread::run(){
-
+/*
     g::setPoint.setPosition(0.6, 0 , -1);
     sleep(4);
     g::setPoint.setYaw(PI/2);
     sleep(2);
     g::setPoint.setYaw(PI);
     sleep(4);
+    */
     t.start();
     rate.start();
     while (!m_stop && t.elapsed() < 50000) {
 
-
+/*
         // Circular trajectory
         milli = t.elapsed();
         x_sp = 0.6*cos(omega * milli / 1000);
@@ -49,8 +49,14 @@ void ManualThread::run(){
 
         qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
         qDebug() << "yaw: " << yaw;
+*/
+
+        // land try
 
 
+
+
+        qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z() <<"yaw: "<<g::setPoint.yaw();
         sleep(1/r - rate.elapsed());
         rate.restart();
 

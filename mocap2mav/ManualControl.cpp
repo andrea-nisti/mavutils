@@ -10,7 +10,7 @@
 #include "global.h"
 #define PI 3.141592653589
 
-
+float yawT = 0;
 
 ManualControl::ManualControl(QObject *parent) :
     QObject(parent)
@@ -18,7 +18,7 @@ ManualControl::ManualControl(QObject *parent) :
 
     this->setHome();
     qDebug() << "homing" ;
-
+    qDebug() << "manual from: " << QThread::currentThreadId();
     //Start Calculate()
     win = new Window(400,400);
     win->button->setText("HOME");
@@ -77,6 +77,9 @@ ManualControl::ManualControl(QObject *parent) :
     ccw->setGeometry(c.x()-160,c.y() + 60,40,40);
     connect(ccw, SIGNAL(clicked()),this, SLOT(decrYaw()));
 
+
+    //PUBLISH SLOT
+
     win->show();
 
 }
@@ -91,75 +94,89 @@ void ManualControl::setHome(){
 
 void ManualControl::decrX(){
 
-    command comm;
-    comm.priority = 1;
-    comm.p.x = - 0.1;
-    comm.p.y = 0;
+    MavState comm = g::setPoint;
+    comm.setX(comm.x() - 0.1);
+    manualCommand.push_back(comm);
+    publish();
 
-    comm.p.yaw = 0;
-    //g::setPoint.setX(g::setPoint.x() - 0.1);
-    commVect.push_back(comm);
-    commanderT.checkCommands();
 
-     qDebug() << commVect.size();
-    qDebug() << "SET POINT: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
+
 }
 
 void ManualControl::decrY(){
 
-    g::setPoint.setY(g::setPoint.y() - 0.1);
-    qDebug() << "SET POINT: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
+    MavState comm = g::setPoint;
+    comm.setY(comm.y() - 0.1);
+    manualCommand.push_back(comm);
+    publish();
+
 }
 
 void ManualControl::incrX(){
+    MavState comm = g::setPoint;
+    comm.setX(comm.x() + 0.1);
+    manualCommand.push_back(comm);
+    publish();
 
-    g::setPoint.setX(g::setPoint.x() + 0.1);
-    qDebug() << "SET POINT: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
 }
 
 void ManualControl::incrY(){
+    MavState comm = g::setPoint;
+    comm.setY(comm.y() + 0.1);
+    manualCommand.push_back(comm);
+    publish();
 
-    g::setPoint.setY(g::setPoint.y() + 0.1);
-    qDebug() << "SET POINT: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
 }
 
 void ManualControl::incrZ(){
+    MavState comm = g::setPoint;
+    comm.setZ(comm.z() + 0.1);
+    manualCommand.push_back(comm);
+    publish();
 
-    g::setPoint.setZ(g::setPoint.z() + 0.1);
-    qDebug() << "SET POINT: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
 }
 
 void ManualControl::decrZ(){
+    MavState comm = g::setPoint;
+    comm.setZ(comm.z() - 0.1);
+    manualCommand.push_back(comm);
+    publish();
 
-    g::setPoint.setZ(g::setPoint.z() - 0.1);
-    qDebug() << "SET POINT: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
 }
 
 void ManualControl::incrYaw(){
 
-    float yaw;
+    MavState comm = g::setPoint;
 
-    yaw = g::setPoint.yaw();
-    yaw += PI / 10 ;
-    if (yaw > PI){
-        yaw = -yaw + 2*PI/10;
+
+
+    float yawT = comm.yaw();
+
+
+    yawT += PI / 10 ;
+    if (yawT > PI){
+        yawT = -yawT + 2*PI/10;
     }
 
-    g::setPoint.setYaw(yaw);
-    qDebug() << "yaw: " << g::setPoint.yaw();
+    comm.setYaw(yawT);
+    manualCommand.push_back(comm);
+    publish();
+
 }
 
 void ManualControl::decrYaw(){
+    MavState comm = g::setPoint;
+    float yawT=comm.yaw();
 
-    float yaw;
 
-    yaw = g::setPoint.yaw();
-    yaw -= PI / 10 ;
-    if (yaw < -PI){
-        yaw = -yaw - 2*PI/10;
+    yawT -= PI / 10 ;
+    if (yawT < -PI){
+        yawT = -yawT - 2*PI/10;
     }
 
-    g::setPoint.setYaw(yaw);
-    qDebug() << "yaw: " << g::setPoint.yaw();
+    comm.setYaw(yawT);
+    manualCommand.push_back(comm);
+    publish();
+
 }
 

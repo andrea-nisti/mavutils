@@ -13,8 +13,11 @@ public:
     explicit AutoControl(QObject *parent = 0);
 
 signals:
+    void publish();
 
 public slots:
+    int land(float speed, float dt);
+    void takeOff();
 
 };
 

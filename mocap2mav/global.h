@@ -9,14 +9,17 @@
 #include "Window.h"
 #include "AutoControl.h"
 #include "CommanderThread.h"
+#include "MavState.h"
 
 namespace g {
     extern MavState state;
     extern MavState setPoint;
 }
 
-extern std::vector <command> commVect;
-extern CommanderThread commanderT;
+extern std::vector <MavState> manualCommand;
+extern std::vector <MavState> autoCommand;
+//extern CommanderThread commanderT;
+
 
 
 #endif // GLOBAL_H
