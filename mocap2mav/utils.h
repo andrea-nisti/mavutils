@@ -10,14 +10,31 @@ struct position{
     double z;
     double yaw;
 
+    void operator=(position &p){
+        x = p.x;
+        y = p.y;
+        z = p.z;
+        yaw = p.yaw;
+    }
+
 };
 
-struct command {
 
-    int priority;
+
+struct action{
+    char type;
+    double params[4] = {0,0,0,0};
+};
+
+struct node {
+
+    int id;
     position p;
+    char action;
 
 };
+
+
 
 
 #endif // UTILS_H

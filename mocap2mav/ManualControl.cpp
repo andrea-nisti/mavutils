@@ -29,6 +29,7 @@ ManualControl::ManualControl(QObject *parent) :
     start->setGeometry(30,340,80,30);
     connect(start, SIGNAL(clicked()), &thread, SLOT(startMe()));
 
+
     //STOP button
     QPushButton *stop = new QPushButton("STOP",win);
     stop->setGeometry(290,340,80,30);

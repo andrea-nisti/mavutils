@@ -10,6 +10,8 @@
 #include <QThread>
 #include "MainControl.h"
 #include "Commander.h"
+#include "utils.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +23,8 @@ int main(int argc, char *argv[])
     //Commander commander;
     //ManualControl manual;
 
+
+    position p1;
     qDebug() << "main from: " << QThread::currentThreadId();
 
 

@@ -14,6 +14,8 @@ public:
     bool m_stop;
 signals:
 
+    void begin();
+
 public slots:
 
     void startMe();

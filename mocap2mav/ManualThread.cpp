@@ -18,7 +18,7 @@ ManualThread::ManualThread(QObject *parent) :
 double omega = 0.4;
 QTime t;
 QTime rate;
-int r = 1; //Hz
+int r = 5; //Hz
 int milli;
 double x_sp,y_sp,yaw;
 void ManualThread::run(){
@@ -32,7 +32,10 @@ void ManualThread::run(){
     */
     t.start();
     rate.start();
+
+
     while (!m_stop && t.elapsed() < 50000) {
+        rate.restart();
 
 /*
         // Circular trajectory
@@ -57,8 +60,11 @@ void ManualThread::run(){
 
 
         qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z() <<"yaw: "<<g::setPoint.yaw();
-        sleep(1/r - rate.elapsed());
-        rate.restart();
+        msleep(1000/r - (float)rate.elapsed());
+
+
+
+
 
     }
 
@@ -69,6 +75,7 @@ void ManualThread::startMe(){
     qDebug() << "starting thread";
     m_stop = false;
     this->start();
+    begin();
 
 }
 

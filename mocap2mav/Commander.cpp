@@ -12,7 +12,7 @@ Commander::Commander(QObject *parent) :
 void Commander::checkCommands(){
 
     //priority check
-    qDebug() << "checking from: " << QThread::currentThreadId();
+
     if (manualCommand.size()>0){
 
 
@@ -24,7 +24,7 @@ void Commander::checkCommands(){
 
     }
     else if(autoCommand.size()>0){
-
+        g::setPoint = autoCommand[0];
         for(int j = 0;j < autoCommand.size();j++){
             //publish
         }

@@ -6,6 +6,8 @@
 #include "CommanderThread.h"
 #include "Commander.h"
 #include "AutoControl.h"
+#include "AutoThread.h"
+#include "ExecThread.h"
 
 class MainControl : public QObject
 {
@@ -17,12 +19,16 @@ public:
     AutoControl automatic;
     Commander commander;
 
+    AutoThread automaticThread;
+    ExecThread executioner;
 
 
 
 signals:
 
 public slots:
+
+
 
 };
 

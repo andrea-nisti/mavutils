@@ -10,6 +10,7 @@
 #include "AutoControl.h"
 #include "CommanderThread.h"
 #include "MavState.h"
+#include "utils.h"
 
 namespace g {
     extern MavState state;
@@ -18,7 +19,22 @@ namespace g {
 
 extern std::vector <MavState> manualCommand;
 extern std::vector <MavState> autoCommand;
-//extern CommanderThread commanderT;
+
+namespace executioner{
+    namespace land{
+
+
+
+    }
+    namespace take_off{
+
+    }
+
+
+
+}
+
+extern std::vector<node> nodeList;
 
 
 
