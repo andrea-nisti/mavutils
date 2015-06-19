@@ -7,7 +7,7 @@
 #include "ManualControl.h"
 #include "PositionDispatcher.h"
 #include "Window.h"
-#include "AutoControl.h"
+
 #include "CommanderThread.h"
 #include "MavState.h"
 #include "utils.h"
@@ -22,11 +22,17 @@ extern std::vector <MavState> autoCommand;
 
 namespace executioner{
     namespace land{
-
-
+       extern bool land_sig;
+       extern bool landed;
 
     }
     namespace take_off{
+       extern bool take_off_sig;
+       extern bool take_off_done;
+    }
+    namespace move {
+       extern bool move_sig;
+       extern bool move_done;
 
     }
 
@@ -35,6 +41,7 @@ namespace executioner{
 }
 
 extern std::vector<node> nodeList;
+extern int actualNode;
 
 
 

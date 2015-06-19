@@ -11,6 +11,8 @@
 #include "MainControl.h"
 #include "Commander.h"
 #include "utils.h"
+#include "Automatic.h"
+#include "Executioner.h"
 
 
 int main(int argc, char *argv[])
@@ -19,12 +21,19 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     //NatNetReceiver mocap;
     //PositionDispatcher positionDispatcher;
-    MainControl controller;
-    //Commander commander;
-    //ManualControl manual;
+   // MainControl controller;
+    Commander commander;
+    ManualControl manual;
+    Automatic autom;
+    Executioner ex;
 
 
-    position p1;
+    //Connect manual control to commander
+    QObject::connect(&manual,SIGNAL(publish()),&commander,SLOT(checkCommands()));
+    QObject::connect(&autom,SIGNAL(publish()),&commander,SLOT(checkCommands()));
+
+
+
     qDebug() << "main from: " << QThread::currentThreadId();
 
 

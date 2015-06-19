@@ -11,6 +11,7 @@ public:
     explicit AutoThread(QObject *parent = 0);
     int land(float speed, float dt, bool wasLanding);
     void takeOff();
+    void move(double alpha);
 signals:
     void publish();
 

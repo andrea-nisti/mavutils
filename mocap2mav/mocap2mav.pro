@@ -18,13 +18,14 @@ SOURCES += \
     PositionDispatcher.cpp \
     Window.cpp \
     ManualControl.cpp \
-    AutoControl.cpp \
     ManualThread.cpp \
     CommanderThread.cpp \
     MainControl.cpp \
     Commander.cpp \
     AutoThread.cpp \
-    ExecThread.cpp
+    ExecThread.cpp \
+    Automatic.cpp \
+    Executioner.cpp
 
 
 HEADERS += \
@@ -35,11 +36,12 @@ HEADERS += \
     ManualControl.h \
     global.h \
     utils.h \
-    AutoControl.h \
     ManualThread.h \
     CommanderThread.h \
     MainControl.h \
     Commander.h \
     AutoThread.h \
     stateParams.h \
-    ExecThread.h
+    ExecThread.h \
+    Automatic.h \
+    Executioner.h

@@ -13,7 +13,7 @@
  * l : land
  * t : take off
  * f : follow trajectory
- * s : stare at point
+ *
  *
  */
 
@@ -22,7 +22,8 @@ class ExecThread : public QThread
     Q_OBJECT
 
 
-    node actualNode;
+
+    void run();
 public:
     explicit ExecThread(QObject *parent = 0);
 

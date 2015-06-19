@@ -5,10 +5,10 @@
 
 struct position{
 
-    double x;
-    double y;
-    double z;
-    double yaw;
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    double yaw = 0;
 
     void operator=(position &p){
         x = p.x;
@@ -30,7 +30,7 @@ struct node {
 
     int id;
     position p;
-    char action;
+    action a;
 
 };
 

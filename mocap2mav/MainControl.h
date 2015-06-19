@@ -5,7 +5,7 @@
 #include"ManualControl.h"
 #include "CommanderThread.h"
 #include "Commander.h"
-#include "AutoControl.h"
+
 #include "AutoThread.h"
 #include "ExecThread.h"
 
@@ -16,11 +16,11 @@ public:
     explicit MainControl(QObject *parent = 0);
 
     ManualControl manual;
-    AutoControl automatic;
+
     Commander commander;
 
-    AutoThread automaticThread;
-    ExecThread executioner;
+    //AutoThread automaticThread;
+    //ExecThread executioner;
 
 
 
