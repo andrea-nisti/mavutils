@@ -24,11 +24,14 @@ namespace executioner{
     namespace land{
        extern bool land_sig;
        extern bool landed;
+       extern bool was_executing;
 
     }
     namespace take_off{
        extern bool take_off_sig;
        extern bool take_off_done;
+       extern bool was_executing;
+
     }
     namespace move {
        extern bool move_sig;

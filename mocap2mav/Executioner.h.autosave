@@ -1,0 +1,21 @@
+#ifndef EXECUTIONER_H
+#define EXECUTIONER_H
+
+#include <QObject>
+#include "ExecThread.h"
+
+class Executioner : public QObject
+{
+    Q_OBJECT
+    ExecThread thread;
+public:
+    explicit Executioner(QObject *parent = 0);
+
+signals:
+
+public slots:
+    
+
+};
+
+#endif // EXECUTIONER_H

@@ -7,10 +7,14 @@ namespace executioner{
     namespace land{
        bool land_sig;
        bool landed;
+       bool was_executing;
+
     }
     namespace take_off{
        bool take_off_sig;
        bool take_off_done;
+       bool was_executing;
+
     }
     namespace move{
        bool move_sig;
@@ -59,8 +63,7 @@ ExecThread::ExecThread(QObject *parent) :
 
     //Initialization for take off
     if(nodeList.size()>0){
-        nodeList[0].p.x = g::state.x();
-        nodeList[0].p.y = g::state.y();
+
         can_run = true;
     }
     else{
@@ -86,12 +89,13 @@ void ExecThread::run(){
 
     QTime rate;
     int r = 40; //Hz
-    rate.start();
+
 
     qDebug() << "executioner from: " << QThread::currentThreadId();
 
-
+    signalsReset();
     bool message = true;
+    rate.start();
     while(actualNode < nodeList.size()){
 
 
@@ -101,43 +105,55 @@ void ExecThread::run(){
         if(message) {
                 qDebug() << "Performing node: " << actualNode << "with action: " << act;
                 message = false;
-                qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z() <<"yaw: "<<g::setPoint.yaw();
         }
 
         //Toggle action
 
         switch (act) {
-
+        //MOVE
         case 'm':
             executioner::move::move_sig = true;
             break;
+        //LAND
         case 'l':
+            //Land on actual position
+            if(!executioner::land::was_executing){
+                nodeList[actualNode].p.x = g::state.x();
+                nodeList[actualNode].p.y = g::state.y();
+                nodeList[actualNode].p.z = g::state.z();
 
-            nodeList[actualNode].p.x = g::state.x();
-            nodeList[actualNode].p.y = g::state.y();
-            nodeList[actualNode].p.z = g::state.z();
+                executioner::land::was_executing = true;
+            }
 
             executioner::land::land_sig = true;
             break;
-        case 't':
 
-            nodeList[actualNode].p.x = g::state.x();
-            nodeList[actualNode].p.y = g::state.y();
-            nodeList[actualNode].p.z = g::state.z();
+        //TAKEOFF
+        case 't':
+            //Takeoff from actual position
+            if(!executioner::take_off::was_executing){
+                nodeList[actualNode].p.x = g::state.x();
+                nodeList[actualNode].p.y = g::state.y();
+                nodeList[actualNode].p.z = g::state.z();
+
+                executioner::take_off::was_executing = true;
+            }
 
             executioner::take_off::take_off_sig = true;
             break;
+
         default:
             break;
         }
 
-
+        //Is the action completed?
         if(checkActions(act)) {
             actualNode++;
             signalsReset();
             message = true;
         }
 
+        //Spin
         msleep(1000/r - (float)rate.elapsed());
         rate.restart();
     }
@@ -152,7 +168,7 @@ void ExecThread::run(){
 bool checkActions(char a){
 
     switch (a) {
-
+    //MOVE
     case 'm':
 
         if(fabs(g::state.x() - nodeList[actualNode].p.x) < 0.15 &&
@@ -169,11 +185,13 @@ bool checkActions(char a){
 
         return executioner::move::move_done;
         break;
+    //LAND
     case 'l':
 
         return executioner::land::landed; // XXX Choose a better stopping condition based on vz;
 
         break;
+    //TAKEOFF
     case 't':
 
         if(fabs(g::state.z() - nodeList[actualNode].a.params[0]) < 0.1 ){
@@ -190,6 +208,7 @@ bool checkActions(char a){
 
 
     default:
+
         break;
     }
 
@@ -202,8 +221,10 @@ void signalsReset(){
 
     executioner::land::landed = false;
     executioner::land::land_sig = false;
+    executioner::land::was_executing = false;
     executioner::take_off::take_off_sig = false;
     executioner::take_off::take_off_done = false;
+    executioner::take_off::was_executing = false;
     executioner::move::move_done = false;
     executioner::move::move_sig = false;
 

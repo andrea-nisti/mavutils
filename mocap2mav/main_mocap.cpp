@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
     //MainControl controller;
     Commander commander;
     ManualControl manual;
-    Automatic autom;
-    Executioner ex;
+    //Automatic autom;
+    //Executioner ex;
 
 
     //Connect manual control to commander
