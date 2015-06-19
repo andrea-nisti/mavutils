@@ -30,6 +30,7 @@ public:
 signals:
 
 public slots:
+    void startMe();
 
 };
 

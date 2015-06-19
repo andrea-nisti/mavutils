@@ -3,5 +3,5 @@
 Executioner::Executioner(QObject *parent) :
     QObject(parent)
 {
-    thread.start();
+    //thread.start();
 }

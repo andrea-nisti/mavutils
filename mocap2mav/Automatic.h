@@ -7,10 +7,10 @@
 class Automatic : public QObject
 {
     Q_OBJECT
-    AutoThread thread;
+
 public:
     explicit Automatic(QObject *parent = 0);
-
+    AutoThread thread;
 signals:
 
     void publish();

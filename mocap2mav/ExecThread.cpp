@@ -39,7 +39,7 @@ ExecThread::ExecThread(QObject *parent) :
     node1.a.type = 't';
     node1.a.params[0] = -0.640; //height
     nodeList.push_back(node1);
-
+/*
     node node2;
     node2.a.type = 'm';
     node2.p.x = 1;
@@ -58,7 +58,7 @@ ExecThread::ExecThread(QObject *parent) :
     node4.a.type = 'l';
     node4.a.params[0] = 0.3; //height
     nodeList.push_back(node4);
-
+*/
 
 
     //Initialization for take off
@@ -230,7 +230,9 @@ void signalsReset(){
 
 }
 
-
+void ExecThread::startMe(){
+    this->start();
+}
 
 
 

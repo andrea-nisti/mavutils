@@ -16,6 +16,7 @@ signals:
     void publish();
 
 public slots:
+    void startMe();
 
 
 };

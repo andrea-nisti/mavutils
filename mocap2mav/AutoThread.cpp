@@ -134,7 +134,9 @@ void AutoThread::move(double alpha){
 
 }
 
-
+void AutoThread::startMe(){
+    this->start();
+}
 
 
 

@@ -7,13 +7,14 @@
 class Executioner : public QObject
 {
     Q_OBJECT
-    ExecThread thread;
+
 public:
     explicit Executioner(QObject *parent = 0);
-
+    ExecThread thread;
 signals:
 
 public slots:
+
 
 };
 

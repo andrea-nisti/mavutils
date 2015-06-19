@@ -4,7 +4,7 @@ Automatic::Automatic(QObject *parent) :
     QObject(parent)
 {
     connect(&thread,SIGNAL(publish()),this,SLOT(publishWrapper()));
-    thread.start();
+    //thread.start();
 }
 
 void Automatic::publishWrapper(){
