@@ -17,7 +17,7 @@ AutoThread::AutoThread(QObject *parent) :
 void AutoThread::run(){
     QTime t;
     QTime rate;
-    int r = 20; //Hz
+    int r = 2; //Hz
     int milli;
     qDebug() << "automatic from: " << QThread::currentThreadId();
     t.start();

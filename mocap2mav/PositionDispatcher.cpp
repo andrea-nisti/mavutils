@@ -73,10 +73,10 @@ void PositionDispatcher::sendPosition()
 
         _dispatchTime.restart();
 
-        qDebug() << "Sent now     :     " << g::state.x() << "\t"
-                             <<  g::state.y() << "\t"
-                             << g::state.z()<< "\t"
-                             ;
+//        qDebug() << "Sent now     :     " << g::state.x() << "\t"
+//                             <<  g::state.y() << "\t"
+//                             << g::state.z()<< "\t"
+//                             ;
 
 
         mavlink_msg_vicon_position_estimate_pack(
@@ -90,7 +90,7 @@ void PositionDispatcher::sendPosition()
                     0, //rad
                     g::setPoint.yaw()); //rad
          _sendMavlinkMessage(&msg2);
-         qDebug() << "Sent position target";
+        // qDebug() << "Sent position target";
 
 
 /*

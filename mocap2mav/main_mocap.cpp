@@ -19,9 +19,9 @@ int main(int argc, char *argv[])
 {
 
     QApplication a(argc, argv);
-    //NatNetReceiver mocap;
-    //PositionDispatcher positionDispatcher;
-   // MainControl controller;
+    NatNetReceiver mocap;
+    PositionDispatcher positionDispatcher;
+    //MainControl controller;
     Commander commander;
     ManualControl manual;
     Automatic autom;
@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
 
 
 
-//    QObject::connect(&mocap, SIGNAL(dataUpdate()), &positionDispatcher, SLOT(sendPosition()));
-//    QObject::connect(&positionDispatcher, SIGNAL(finished()), &a, SLOT(quit()));
+    QObject::connect(&mocap, SIGNAL(dataUpdate()), &positionDispatcher, SLOT(sendPosition()));
+    QObject::connect(&positionDispatcher, SIGNAL(finished()), &a, SLOT(quit()));
 
     return a.exec();
 }
