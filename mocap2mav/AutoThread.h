@@ -9,7 +9,7 @@ class AutoThread : public QThread
     void run();
 public:
     explicit AutoThread(QObject *parent = 0);
-    void land(float speed, float dt);
+    void land(float speed, float dt, int rate, double vz);
     void takeOff();
     void move(double alpha);
 signals:

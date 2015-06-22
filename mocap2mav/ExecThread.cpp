@@ -37,7 +37,7 @@ ExecThread::ExecThread(QObject *parent) :
 
     node node1;
     node1.a.type = 't';
-    node1.a.params[0] = -0.640; //height
+    node1.a.params[0] = -1; //height
     nodeList.push_back(node1);
 /*
     node node2;
@@ -53,12 +53,12 @@ ExecThread::ExecThread(QObject *parent) :
     node3.p.y = -1;
     node3.p.z =-0.640d;
     nodeList.push_back(node3);
-
+*/
     node node4;
     node4.a.type = 'l';
-    node4.a.params[0] = 0.3; //height
+    node4.a.params[0] = 0.4; //height
     nodeList.push_back(node4);
-*/
+
 
 
     //Initialization for take off
@@ -88,7 +88,7 @@ void ExecThread::run(){
 
 
     QTime rate;
-    int r = 40; //Hz
+    int r = 120; //Hz
 
 
     qDebug() << "executioner from: " << QThread::currentThreadId();

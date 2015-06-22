@@ -7,7 +7,6 @@ MainControl::MainControl(QObject *parent) :
 {
 
 
-
     ExecThread executioner;
     AutoThread automaticThread;
     //Connect manual control to commander

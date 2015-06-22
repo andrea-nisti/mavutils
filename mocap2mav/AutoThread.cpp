@@ -4,24 +4,30 @@
 #include "global.h"
 #include "utils.h"
 #include <cmath>
-
+int count;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
 
 }
-
+int r_auto = 50; //Hz
 void AutoThread::run(){
 
     QTime rate;
-    int r = 20; //Hz
+
 
     qDebug() << "automatic from: " << QThread::currentThreadId();
-
+    MavState previous = g::state;
+    MavState next;
     rate.start();
+    count = 0;
 
+    double vz;
     while (true) {
 
+        next = g::state;
+
+        vz = r_auto * (next.z() - previous.z()) ;
         //takeoff
         if(executioner::take_off::take_off_sig){
                 takeOff();
@@ -29,7 +35,7 @@ void AutoThread::run(){
         //land
         if(executioner::land::land_sig){
             float vel = nodeList[actualNode].a.params[0];
-            land(vel,(float)1/r);
+            land(vel,(float)1/r_auto,r_auto,vz);
         }
 
         //move
@@ -37,37 +43,46 @@ void AutoThread::run(){
             move(0.5);
         }
 
-        msleep(1000/r - (float)rate.elapsed());
+        previous = next;
+
+        msleep(1000/r_auto - (float)rate.elapsed());
         rate.restart();
+
 
     }
 
 }
 
-void AutoThread::land(float speed, float dt){
+void AutoThread::land(float speed, float dt,int rate,double vz){
 
     //landing procedure
 
-        MavState comm = g::setPoint;
-        comm.setX(nodeList[actualNode].p.x);
-        comm.setY(nodeList[actualNode].p.y);
-        float z = g::state.z();
-        if(z > -0.30){
+    MavState comm = g::setPoint;
+    comm.setX(nodeList[actualNode].p.x);
+    comm.setY(nodeList[actualNode].p.y);
+    float z = comm.z();
 
-            z = 1;
+    if(fabs(vz) < 0.01){
+
+        if(++count == 2 * r_auto){
+
             executioner::land::landed = true;
-
-        }
-        else{
-
-            z += speed * dt;
-            executioner::land::landed = false;
-
+            count = 0;
         }
 
-        comm.setZ(z);
-        autoCommand.push_back(comm);
-        publish();
+
+    }
+    else{
+
+        if (g::state.z() > -0.2) speed = 0.2;
+        z += speed * dt;
+        executioner::land::landed = false;
+
+    }
+
+    comm.setZ(z);
+    autoCommand.push_back(comm);
+    publish();
 
 }
 
@@ -108,9 +123,9 @@ void AutoThread::move(double alpha){
 
     //Publish
     if(true){//fabs(dist) < alpha){
-    comm.setX( x_node);//x_robot + incrementVect[0]);
-    comm.setY( y_node);//y_robot + incrementVect[1]);
-    comm.setZ( z_node);//z_robot + incrementVect[2]);
+        comm.setX( x_node);//x_robot + incrementVect[0]);
+        comm.setY( y_node);//y_robot + incrementVect[1]);
+        comm.setZ( z_node);//z_robot + incrementVect[2]);
     }
 
     else if(fabs(dist) >= alpha){

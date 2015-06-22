@@ -90,7 +90,7 @@ void PositionDispatcher::sendPosition()
                     0, //rad
                     g::setPoint.yaw()); //rad
          _sendMavlinkMessage(&msg2);
-        // qDebug() << "Sent position target";
+         //qDebug() << "Sent position target";
 
 
 /*
