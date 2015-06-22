@@ -37,27 +37,45 @@ ExecThread::ExecThread(QObject *parent) :
 
     node node1;
     node1.a.type = 't';
-    node1.a.params[0] = -1; //height
+    node1.a.params[0] = -1.5; //height
     nodeList.push_back(node1);
-/*
+
     node node2;
     node2.a.type = 'm';
     node2.p.x = 1;
-    node2.p.y = 1;
-    node2.p.z =-0.640;
+    node2.p.y = 0;
+    node2.p.z =-1.5;
     nodeList.push_back(node2);
 
     node node3;
     node3.a.type = 'm';
-    node3.p.x = -1;
-    node3.p.y = -1;
-    node3.p.z =-0.640d;
+    node3.p.x = 1.018;
+    node3.p.y = 1.072;
+    node3.p.z =-1.7;
     nodeList.push_back(node3);
-*/
+
     node node4;
     node4.a.type = 'l';
     node4.a.params[0] = 0.4; //height velocity
+    node4.a.params[1] = 0.0;
     nodeList.push_back(node4);
+    nodeList.push_back(node1);
+
+    node node5;
+    node5.a.type = 'm';
+    node5.p.x = 0;
+    node5.p.y = 0;
+    node5.p.z =-0.7;
+    nodeList.push_back(node5);
+
+    nodeList.push_back(node3);
+    nodeList.push_back(node4);
+
+
+
+
+
+    //nodeList.push_back(node1);
 
 
 
@@ -164,7 +182,7 @@ void ExecThread::run(){
 
 }
 
-
+int move_count = 0;
 bool checkActions(char a){
 
     switch (a) {
@@ -173,13 +191,16 @@ bool checkActions(char a){
 
         if(fabs(g::state.x() - nodeList[actualNode].p.x) < 0.15 &&
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
-           fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15){
+           fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
 
-           executioner::move::move_done = true;
+
+           if(++move_count == 3 * 120) executioner::move::move_done = true;
 
         }
         else{
             executioner::move::move_done = false;
+            move_count = 0;
+
         }
 
 

@@ -66,7 +66,7 @@ void AutoThread::land(float speed, float dt,double vz){
     float offset = nodeList[actualNode].a.params[1];
     float z = comm.z();
 
-    if(fabs(vz) < 0.01 && g::state.z() > - 0.08 - offset){
+    if(fabs(vz) < 0.01 && g::state.z() ){
 
         if(++count == land_wait * r_auto) executioner::land::landed = true;
 
@@ -79,7 +79,7 @@ void AutoThread::land(float speed, float dt,double vz){
         }
         else{
 
-            z = g::state.z() + 0.1;
+            z = g::state.z() + 0.3;
         }
 
         count = 0;
