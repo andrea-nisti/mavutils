@@ -56,7 +56,7 @@ ExecThread::ExecThread(QObject *parent) :
 */
     node node4;
     node4.a.type = 'l';
-    node4.a.params[0] = 0.4; //height
+    node4.a.params[0] = 0.4; //height velocity
     nodeList.push_back(node4);
 
 

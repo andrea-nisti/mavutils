@@ -41,7 +41,7 @@ HEADERS += \
     MainControl.h \
     Commander.h \
     AutoThread.h \
-    stateParams.h \
     ExecThread.h \
     Automatic.h \
-    Executioner.h
+    Executioner.h \
+    params.h
