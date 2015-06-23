@@ -128,17 +128,20 @@ void ExecThread::run(){
         //Toggle action
 
         switch (act) {
+
         //MOVE
         case 'm':
             executioner::move::move_sig = true;
             break;
+
         //LAND
         case 'l':
-            //Land on actual position
+            //Land on previous move position
             if(!executioner::land::was_executing){
-                nodeList[actualNode].p.x = g::state.x();
-                nodeList[actualNode].p.y = g::state.y();
-                nodeList[actualNode].p.z = g::state.z();
+
+                nodeList[actualNode].p.x = nodeList[actualNode - 1].p.x;
+                nodeList[actualNode].p.y = nodeList[actualNode - 1].p.y;
+                nodeList[actualNode].p.z = nodeList[actualNode - 1].p.z;
 
                 executioner::land::was_executing = true;
             }
@@ -150,6 +153,7 @@ void ExecThread::run(){
         case 't':
             //Takeoff from actual position
             if(!executioner::take_off::was_executing){
+
                 nodeList[actualNode].p.x = g::state.x();
                 nodeList[actualNode].p.y = g::state.y();
                 nodeList[actualNode].p.z = g::state.z();

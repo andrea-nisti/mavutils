@@ -17,9 +17,9 @@ void Commander::checkCommands(){
 
 
 
-        g::setPoint = manualCommand[0];
-        for(int i = 0;i < manualCommand.size();i++){
 
+        for(int i = 0;i < manualCommand.size();i++){
+            g::setPoint = manualCommand[i];
         }
 
     }
@@ -27,6 +27,7 @@ void Commander::checkCommands(){
         g::setPoint = autoCommand[0];
         for(int j = 0;j < autoCommand.size();j++){
             //publish
+            g::setPoint = autoCommand[j];
         }
 
     }
