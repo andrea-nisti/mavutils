@@ -18,7 +18,6 @@ void AutoThread::run(){
 
     QTime rate;
 
-
     qDebug() << "automatic from: " << QThread::currentThreadId();
     MavState previous = g::state;
     MavState next;
@@ -31,10 +30,12 @@ void AutoThread::run(){
         next = g::state;
 
         vz = r_auto * (next.z() - previous.z()) ;
+
         //takeoff
         if(executioner::take_off::take_off_sig){
                 takeOff();
         }
+
         //land
         if(executioner::land::land_sig){
             float vel = nodeList[actualNode].a.params[0];
@@ -61,12 +62,10 @@ void AutoThread::land(float speed, float dt,double vz){
     //landing procedure
 
     MavState comm = g::setPoint;
-    comm.setX(nodeList[actualNode].p.x);
-    comm.setY(nodeList[actualNode].p.y);
     float offset = nodeList[actualNode].a.params[1];
     float z = comm.z();
 
-    if(fabs(vz) < 0.01 && g::state.z() ){
+    if(fabs(vz) < 0.01){
 
         if(++count == land_wait * r_auto) executioner::land::landed = true;
 

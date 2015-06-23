@@ -2,6 +2,7 @@
 #include "global.h"
 #include <vector>
 #include "utils.h"
+//#include "params.h"
 
 namespace executioner{
     namespace land{
@@ -104,9 +105,8 @@ void ExecThread::run(){
      *
      */
 
-
     QTime rate;
-    int r = 120; //Hz
+    int r_exec = 120; //Hz
 
 
     qDebug() << "executioner from: " << QThread::currentThreadId();
@@ -157,6 +157,7 @@ void ExecThread::run(){
                 nodeList[actualNode].p.x = g::state.x();
                 nodeList[actualNode].p.y = g::state.y();
                 nodeList[actualNode].p.z = g::state.z();
+                nodeList[actualNode].p.yaw = g::state.getYaw();
 
                 executioner::take_off::was_executing = true;
             }
@@ -176,7 +177,7 @@ void ExecThread::run(){
         }
 
         //Spin
-        msleep(1000/r - (float)rate.elapsed());
+        msleep(1000/r_exec - (float)rate.elapsed());
         rate.restart();
     }
 
@@ -197,7 +198,6 @@ bool checkActions(char a){
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
            fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
 
-
            if(++move_count == 3 * 120) executioner::move::move_done = true;
 
         }
@@ -207,13 +207,12 @@ bool checkActions(char a){
 
         }
 
-
         return executioner::move::move_done;
         break;
     //LAND
     case 'l':
 
-        return executioner::land::landed; // XXX Choose a better stopping condition based on vz;
+        return executioner::land::landed;
 
         break;
     //TAKEOFF
@@ -236,9 +235,6 @@ bool checkActions(char a){
 
         break;
     }
-
-
-
 
 }
 
