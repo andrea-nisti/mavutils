@@ -8,6 +8,7 @@
 
 #include <cmath>
 int count;
+bool point_valid;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
@@ -25,6 +26,7 @@ void AutoThread::run(){
     count = 0;
 
     double vz;
+    point_valid = true;
     while (true) {
 
         next = g::state;
@@ -46,6 +48,12 @@ void AutoThread::run(){
         if(executioner::move::move_sig){
             move(move_alpha);
         }
+
+        //rotate
+        if(executioner::rotate::rotate_sig || point_valid){
+            rotate();
+        }
+
 
         previous = next;
 
@@ -156,6 +164,34 @@ void AutoThread::move(double alpha){
     }
     autoCommand.push_back(comm);
     publish();
+
+}
+
+void AutoThread::rotate(){
+
+    MavState comm = g::setPoint;
+    double angle_valid = nodeList[actualNode].a.params[0];
+    double yaw = nodeList[actualNode].p.yaw;
+
+    if (angle_valid == 1){
+
+        point_valid = false;
+        comm.setYaw(yaw);
+
+
+    }
+    else if(angle_valid == 0){
+        point_valid = true;
+
+        double x_target = nodeList[actualNode].p.x;
+        double y_target = nodeList[actualNode].p.y;
+
+        yaw = atan2(y_target-g::state.y(),x_target-g::state.x());
+        comm.setYaw(yaw);
+
+    }
+    executioner::rotate::rotate_done == true;
+
 
 }
 

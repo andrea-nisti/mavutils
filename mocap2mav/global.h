@@ -39,6 +39,11 @@ namespace executioner{
 
     }
 
+    namespace rotate{
+      extern bool rotate_sig;
+      extern bool rotate_done;
+    }
+
 
 
 }

@@ -12,6 +12,7 @@ public:
     void land(float speed, float dt, double vz);
     void takeOff();
     void move(double alpha);
+    void rotate();
 signals:
     void publish();
 
