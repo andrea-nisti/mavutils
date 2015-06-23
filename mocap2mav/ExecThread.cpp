@@ -159,6 +159,8 @@ void ExecThread::run(){
                 nodeList[actualNode].p.z = g::state.z();
                 nodeList[actualNode].p.yaw = g::state.getYaw();
 
+
+
                 executioner::take_off::was_executing = true;
             }
 
