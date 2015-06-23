@@ -98,6 +98,7 @@ void AutoThread::takeOff(){
 
     comm.setX(nodeList[actualNode].p.x);
     comm.setY(nodeList[actualNode].p.y);
+    comm.setYaw(nodeList[actualNode].p.yaw);
 
     double height = nodeList[actualNode].a.params[0];
 

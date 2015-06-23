@@ -45,7 +45,7 @@ ExecThread::ExecThread(QObject *parent) :
     node2.a.type = 'm';
     node2.p.x = 1;
     node2.p.y = 0;
-    node2.p.z =-1.5;
+    node2.p.z =-0.8;
     nodeList.push_back(node2);
 
     node node3;
@@ -53,24 +53,24 @@ ExecThread::ExecThread(QObject *parent) :
     node3.p.x = 1.018;
     node3.p.y = 1.072;
     node3.p.z =-1.7;
-    nodeList.push_back(node3);
+    //nodeList.push_back(node3);
 
     node node4;
     node4.a.type = 'l';
     node4.a.params[0] = 0.4; //height velocity
-    node4.a.params[1] = 0.0;
+    node4.a.params[1] = 0.0; // offset
     nodeList.push_back(node4);
-    nodeList.push_back(node1);
+   // nodeList.push_back(node1);
 
     node node5;
     node5.a.type = 'm';
     node5.p.x = 0;
     node5.p.y = 0;
     node5.p.z =-0.7;
-    nodeList.push_back(node5);
+    //nodeList.push_back(node5);
 
-    nodeList.push_back(node3);
-    nodeList.push_back(node4);
+    //nodeList.push_back(node3);
+    //nodeList.push_back(node4);
 
 
 
