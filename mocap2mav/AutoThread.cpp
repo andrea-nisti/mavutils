@@ -9,7 +9,7 @@
 #include <cmath>
 #define PI 3.141592653589
 int count, rot_count;
-bool point_valid;
+bool contRot_valid;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
@@ -27,7 +27,7 @@ void AutoThread::run(){
     count = 0;
     rot_count = 0;
     double vz;
-    point_valid = false;
+    contRot_valid = false;
     while (true) {
 
         next = g::state;
@@ -51,7 +51,7 @@ void AutoThread::run(){
         }
 
         //rotate
-        if(executioner::rotate::rotate_sig || point_valid){
+        if(executioner::rotate::rotate_sig || contRot_valid){
             rotate();
         }
 
@@ -163,6 +163,7 @@ void AutoThread::move(double alpha){
         comm.setZ(z_robot + incrementVect[2]);
 
     }
+
     autoCommand.push_back(comm);
     publish();
 
@@ -173,56 +174,64 @@ void AutoThread::rotate(){
     MavState commRot = g::setPoint;
     double robotHeading = g::state.getYaw();
     double angle_valid = nodeList[executioner::rotate::rotate_id].a.params[0];
+    double continue_rotation = nodeList[executioner::rotate::rotate_id].a.params[1];
     double yawSP = nodeList[executioner::rotate::rotate_id].p.yaw;
     double yawComm;
-    if (angle_valid == 1){
 
-        point_valid = false;
+    if (continue_rotation == 0) contRot_valid = false;
+    else if(continue_rotation == 1) contRot_valid = true;
 
-
-        double diff = yawSP - robotHeading;
-        if (yawSP*robotHeading > 0){
-
-            if (fabs(diff) < PI/10) yawComm = yawSP;
-            else{
-                //Increase or decrease yaw sp
-               if (diff >= 0){
-                   yawComm = robotHeading + PI/18;
-               }
-               else{
-                   yawComm = robotHeading - PI/18;
-               }
-
-
-            }
-
-
-
-        }
-        else{
-
-        }
-
-
-
-        commRot.setYaw(yawComm);
-
-
-    }
-    else if(angle_valid == 0){
-        point_valid = true;
+    if (angle_valid == 0){
 
         double x_target = nodeList[executioner::rotate::rotate_id].p.x;
         double y_target = nodeList[executioner::rotate::rotate_id].p.y;
 
-        yawSP = atan2(y_target-g::state.y(),x_target-g::state.x());
-        commRot.setYaw(yawSP);
+        yawSP = atan2(y_target - g::state.y(),x_target - g::state.x());
 
     }
+
+    double diff = yawSP - robotHeading;
+    // Setpoint and actual state with same sign
+    if (yawSP*robotHeading > 0){
+
+        if (fabs(diff) < PI/10) yawComm = yawSP;
+        else{
+            //Increase or decrease yaw sp
+            rot_count = 0;
+            if (diff >= 0){
+                yawComm = robotHeading + PI/18;
+            }
+            else{
+                yawComm = robotHeading - PI/18;
+            }
+        }
+    }
+    else{
+        //SP and state with different signs
+        int sign;
+        if (fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10) yawComm = yawSP;
+        else{
+            //Increase or decrease yaw sp
+            rot_count = 0;
+
+            if (diff >= 0)  sign = 1;
+            else    sign = -1;
+
+            if (PI - fabs(diff) < fabs(diff)) sign = sign * -1;
+
+            yawComm = robotHeading + sign * PI/18;
+
+        }
+    }
+
+    commRot.setYaw(yawComm);
     autoCommand.push_back(commRot);
     publish();
 
-    if(++rot_count == rot_wait * r_auto){ executioner::rotate::rotate_done = true; rot_count = 0; }
+    if(++rot_count == rot_wait * r_auto && !contRot_valid && fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10){
+        executioner::rotate::rotate_done = true; rot_count = 0;
+        rot_count = 0;
+    }
 
 }
 
