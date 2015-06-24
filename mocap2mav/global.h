@@ -26,6 +26,7 @@ namespace executioner{
        extern bool landed;
        extern bool was_executing;
 
+
     }
     namespace take_off{
        extern bool take_off_sig;
@@ -42,6 +43,7 @@ namespace executioner{
     namespace rotate{
       extern bool rotate_sig;
       extern bool rotate_done;
+      extern int rotate_id;
     }
 
 

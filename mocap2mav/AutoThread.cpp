@@ -7,7 +7,8 @@
 #include "params.h"
 
 #include <cmath>
-int count;
+#define PI 3.141592653589
+int count, rot_count;
 bool point_valid;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
@@ -24,9 +25,9 @@ void AutoThread::run(){
     MavState next;
     rate.start();
     count = 0;
-
+    rot_count = 0;
     double vz;
-    point_valid = true;
+    point_valid = false;
     while (true) {
 
         next = g::state;
@@ -169,29 +170,59 @@ void AutoThread::move(double alpha){
 
 void AutoThread::rotate(){
 
-    MavState comm = g::setPoint;
-    double angle_valid = nodeList[actualNode].a.params[0];
-    double yaw = nodeList[actualNode].p.yaw;
-
+    MavState commRot = g::setPoint;
+    double robotHeading = g::state.getYaw();
+    double angle_valid = nodeList[executioner::rotate::rotate_id].a.params[0];
+    double yawSP = nodeList[executioner::rotate::rotate_id].p.yaw;
+    double yawComm;
     if (angle_valid == 1){
 
         point_valid = false;
-        comm.setYaw(yaw);
+
+
+        double diff = yawSP - robotHeading;
+        if (yawSP*robotHeading > 0){
+
+            if (fabs(diff) < PI/10) yawComm = yawSP;
+            else{
+                //Increase or decrease yaw sp
+               if (diff >= 0){
+                   yawComm = robotHeading + PI/18;
+               }
+               else{
+                   yawComm = robotHeading - PI/18;
+               }
+
+
+            }
+
+
+
+        }
+        else{
+
+        }
+
+
+
+        commRot.setYaw(yawComm);
 
 
     }
     else if(angle_valid == 0){
         point_valid = true;
 
-        double x_target = nodeList[actualNode].p.x;
-        double y_target = nodeList[actualNode].p.y;
+        double x_target = nodeList[executioner::rotate::rotate_id].p.x;
+        double y_target = nodeList[executioner::rotate::rotate_id].p.y;
 
-        yaw = atan2(y_target-g::state.y(),x_target-g::state.x());
-        comm.setYaw(yaw);
+        yawSP = atan2(y_target-g::state.y(),x_target-g::state.x());
+        commRot.setYaw(yawSP);
 
     }
-    executioner::rotate::rotate_done == true;
+    autoCommand.push_back(commRot);
+    publish();
 
+    if(++rot_count == rot_wait * r_auto){ executioner::rotate::rotate_done = true; rot_count = 0; }
 
 }
 

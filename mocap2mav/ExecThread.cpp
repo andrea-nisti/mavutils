@@ -25,6 +25,7 @@ namespace executioner{
     namespace rotate{
        bool rotate_sig;
        bool rotate_done;
+       int rotate_id;
     }
 
 }
@@ -55,12 +56,13 @@ ExecThread::ExecThread(QObject *parent) :
 
     node rotate;
     rotate.a.type = 'r';
+    rotate.a.params[0] = 1;
     rotate.p.yaw = PI/3;
     nodeList.push_back(rotate);
 
     move.p.x = 1.018;
     move.p.y = 1.072;
-    move.p.z =-1.7;
+    move.p.z =-1;
     nodeList.push_back(move);
 
     node land;
@@ -170,6 +172,7 @@ void ExecThread::run(){
             executioner::take_off::take_off_sig = true;
             break;
         case 'r':
+            executioner::rotate::rotate_id = actualNode;
             executioner::rotate::rotate_sig = true;
             break;
         default:
@@ -239,7 +242,7 @@ bool checkActions(char a){
 
      case 'r':
 
-        return executioner::move::move_done;
+        return executioner::rotate::rotate_done;
 
         break;
 
