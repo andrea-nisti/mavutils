@@ -43,8 +43,19 @@ void AutoThread::run(){
 
         //land
         if(executioner::land::land_sig){
+
+            position state;
+            state.x = g::state.x();
+            state.y = g::state.y();
+            state.z = g::state.z();
+            position p;
+
+            p.x = nodeList[actualNode].p.x;
+            p.y = nodeList[actualNode].p.y;
+            p.z = nodeList[actualNode].p.z;
+
             float vel = nodeList[actualNode].a.params[0];
-            land(vel,(float)1/r_auto,vz);
+            land(vel,(float)1/r_auto,vz,p,state);
         }
 
         //move
@@ -70,11 +81,13 @@ void AutoThread::run(){
 
 }
 
-void AutoThread::land(float speed, float dt,double vz){
+void AutoThread::land(float speed, float dt,double vz, position p , position robot_state){
 
     //landing procedure
 
     MavState comm = g::setPoint;
+    position error, sP;
+
     float offset = nodeList[actualNode].a.params[1];
     float z = comm.z();
 
@@ -85,13 +98,27 @@ void AutoThread::land(float speed, float dt,double vz){
     }
     else{
 
-        if (g::state.z() >= - 0.2 - offset){
+        //Centering task
+
+            //Calculate error
+
+            error = p - robot_state;
+
+
+            //Calculate corrected setpoint
+
+            sP = error * land_gain + p;
+
+        //Descending task
+
+
+        if (robot_state.z >= - 0.2 - offset){
 
             z += speed * dt;
         }
         else{
 
-            z = g::state.z() + 0.3;
+            z = robot_state.z + 0.3;
         }
 
         count = 0;
@@ -99,6 +126,8 @@ void AutoThread::land(float speed, float dt,double vz){
 
     }
 
+    comm.setX(sP.x);
+    comm.setX(sP.y);
     comm.setZ(z);
     autoCommand.push_back(comm);
     publish();

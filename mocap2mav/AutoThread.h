@@ -2,6 +2,7 @@
 #define AUTOTHREAD_H
 
 #include<QThread>
+#include "utils.h"
 
 class AutoThread : public QThread
 {
@@ -9,7 +10,7 @@ class AutoThread : public QThread
     void run();
 public:
     explicit AutoThread(QObject *parent = 0);
-    void land(float speed, float dt, double vz);
+    void land(float speed, float dt, double vz, position p, position robot_state);
     void takeOff();
     void move(double alpha);
     void rotate();

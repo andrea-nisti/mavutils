@@ -10,12 +10,49 @@ struct position{
     double z = 0;
     double yaw = 0;
 
-    void operator=(position &p){
-        x = p.x;
-        y = p.y;
-        z = p.z;
-        yaw = p.yaw;
+
+    position operator-(position p){
+
+        position temp;
+        temp.x = x - p.x;
+        temp.y = y - p.y;
+        temp.z = z - p.z;
+        return temp;
+
     }
+
+    position operator+(position p){
+
+        position temp;
+        temp.x = x + p.x;
+        temp.y = y + p.y;
+        temp.z = z + p.z;
+        return temp;
+
+    }
+
+    void operator=(position p){
+
+
+        this->x = p.x;
+        this->y = p.y;
+        this->z = p.z;
+
+
+    }
+
+    position operator*(float f){
+
+        position temp;
+        temp.x = f*x;
+        temp.y = f*y;
+        temp.z = f*z;
+
+        return temp;
+
+    }
+
+
 
 };
 
