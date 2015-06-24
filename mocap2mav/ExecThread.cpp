@@ -56,8 +56,10 @@ ExecThread::ExecThread(QObject *parent) :
 
     node rotate;
     rotate.a.type = 'r';
-    rotate.a.params[0] = 1;
-    rotate.p.yaw = PI/3;
+    rotate.a.params[0] = 0;
+    rotate.p.x = 1;
+    rotate.p.y = 1;
+    //rotate.p.yaw = PI/3;
     nodeList.push_back(rotate);
 
     move.p.x = 1.018;

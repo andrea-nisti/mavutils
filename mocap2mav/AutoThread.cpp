@@ -10,6 +10,8 @@
 #define PI 3.141592653589
 int count, rot_count;
 bool contRot_valid;
+void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
+
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
@@ -47,11 +49,13 @@ void AutoThread::run(){
 
         //move
         if(executioner::move::move_sig){
+
             move(move_alpha);
         }
 
         //rotate
         if(executioner::rotate::rotate_sig || contRot_valid){
+
             rotate();
         }
 
@@ -172,14 +176,11 @@ void AutoThread::move(double alpha){
 void AutoThread::rotate(){
 
     MavState commRot = g::setPoint;
+
     double robotHeading = g::state.getYaw();
     double angle_valid = nodeList[executioner::rotate::rotate_id].a.params[0];
-    double continue_rotation = nodeList[executioner::rotate::rotate_id].a.params[1];
     double yawSP = nodeList[executioner::rotate::rotate_id].p.yaw;
     double yawComm;
-
-    if (continue_rotation == 0) contRot_valid = false;
-    else if(continue_rotation == 1) contRot_valid = true;
 
     if (angle_valid == 0){
 
@@ -189,6 +190,28 @@ void AutoThread::rotate(){
         yawSP = atan2(y_target - g::state.y(),x_target - g::state.x());
 
     }
+
+    calculateYawIntem(yawSP,robotHeading,yawComm);
+
+    commRot.setYaw(yawComm);
+    autoCommand.push_back(commRot);
+    publish();
+
+    if(++rot_count == rot_wait * r_auto && fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10){
+        executioner::rotate::rotate_done = true; rot_count = 0;
+        rot_count = 0;
+    }
+
+
+}
+
+void AutoThread::startMe(){
+    this->start();
+}
+
+
+
+void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
     double diff = yawSP - robotHeading;
     // Setpoint and actual state with same sign
@@ -222,30 +245,10 @@ void AutoThread::rotate(){
             yawComm = robotHeading + sign * PI/18;
 
         }
-    }
 
-    commRot.setYaw(yawComm);
-    autoCommand.push_back(commRot);
-    publish();
-
-    if(++rot_count == rot_wait * r_auto && !contRot_valid && fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10){
-        executioner::rotate::rotate_done = true; rot_count = 0;
-        rot_count = 0;
     }
 
 }
-
-void AutoThread::startMe(){
-    this->start();
-}
-
-
-
-
-
-
-
-
 
 
 
