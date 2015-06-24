@@ -24,10 +24,11 @@ void Commander::checkCommands(){
 
     }
     else if(autoCommand.size()>0){
-        g::setPoint = autoCommand[0];
+
         for(int j = 0;j < autoCommand.size();j++){
             //publish
             g::setPoint = autoCommand[j];
+
         }
 
     }
