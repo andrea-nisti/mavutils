@@ -52,13 +52,7 @@ int main(int argc, char *argv[])
     QObject::connect(&positionDispatcher, SIGNAL(finished()), &a, SLOT(quit()));
 
 
-    position ap,b,c;
-    ap.x = 2;
-    b.x = 6;
 
-    c = ap - b;
-    c = c * (float)3.0;
-    qDebug() << c.x;
     return a.exec();
 }
 

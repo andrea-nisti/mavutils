@@ -48,45 +48,47 @@ ExecThread::ExecThread(QObject *parent) :
     nodeList.push_back(node1);
 
     node move;
-    move.a.type = 'm';
-    move.p.x = 1;
-    move.p.y = 0;
-    move.p.z =-0.8;
-    nodeList.push_back(move);
 
     node rotate;
     rotate.a.type = 'r';
-    rotate.a.params[0] = 0;
+    rotate.a.params[0] = 0; //angle_valid
     rotate.p.x = 1;
     rotate.p.y = 1;
-    //rotate.p.yaw = PI/3;
     nodeList.push_back(rotate);
 
+    move.a.type = 'm';
     move.p.x = 1.018;
     move.p.y = 1.072;
-    move.p.z =-1;
+    move.p.z =-1.5;
     nodeList.push_back(move);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 0.4; //height velocity
+    land.a.params[0] = 0.3; //height velocity
     land.a.params[1] = 0.0; // offset
     nodeList.push_back(land);
-    nodeList.push_back(node1);
 
-    move.p.x = 0;
-    move.p.y = 0;
-    move.p.z =-0.7;
+    nodeList.push_back(node1);
+    rotate.p.x = 0;
+    rotate.p.y = 0;
+    nodeList.push_back(rotate);
+
+    move.p.x = 0.5;
+    move.p.y = -0.5;
+    move.p.z = -1;
     nodeList.push_back(move);
 
+    rotate.a.params[0] = 1;
+    rotate.p.yaw = 0;
+    nodeList.push_back(rotate);
     move.p.x = 1.018;
     move.p.y = 1.072;
-    move.p.z =-1.7;
+    move.p.z =-1.5;
     nodeList.push_back(move);
-
-    rotate.p.yaw= 0;
-
     nodeList.push_back(land);
+
+
+
 
 
 
@@ -150,7 +152,8 @@ void ExecThread::run(){
 
                 nodeList[actualNode].p.x = nodeList[actualNode - 1].p.x;
                 nodeList[actualNode].p.y = nodeList[actualNode - 1].p.y;
-                nodeList[actualNode].p.z = nodeList[actualNode - 1].p.z;
+
+                qDebug() << "Landing on: "<<nodeList[actualNode].p.x<<" "<<nodeList[actualNode].p.y;
 
                 executioner::land::was_executing = true;
             }

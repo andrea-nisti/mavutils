@@ -52,7 +52,7 @@ void AutoThread::run(){
 
             p.x = nodeList[actualNode].p.x;
             p.y = nodeList[actualNode].p.y;
-            p.z = nodeList[actualNode].p.z;
+
 
             float vel = nodeList[actualNode].a.params[0];
             land(vel,(float)1/r_auto,vz,p,state);
@@ -65,7 +65,7 @@ void AutoThread::run(){
         }
 
         //rotate
-        if(executioner::rotate::rotate_sig || contRot_valid){
+        if(executioner::rotate::rotate_sig){
 
             rotate();
         }
@@ -92,33 +92,57 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
     float z = comm.z();
 
     if(fabs(vz) < 0.01){
-
+        qDebug()<<"error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
         if(++count == land_wait * r_auto) executioner::land::landed = true;
 
     }
     else{
 
-        //Centering task
 
-            //Calculate error
-
-            error = p - robot_state;
-
-
-            //Calculate corrected setpoint
-
-            sP = error * land_gain + p;
 
         //Descending task
 
 
         if (robot_state.z >= - 0.2 - offset){
-
+            qDebug()<<"error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
             z += speed * dt;
         }
         else{
+         //Centering task
 
-            z = robot_state.z + 0.3;
+                //Calculate error
+
+            error.x = p.x - robot_state.x;
+            error.y = p.y - robot_state.y;
+            qDebug()<<"error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
+
+                //Calculate corrected setpoint
+
+            sP.x = error.x * land_gain + p.x;
+            sP.y = error.y * land_gain + p.y;
+
+                //wait to recenter
+            if(fabs(error.x) < 0.1 && fabs(error.y) < 0.1){
+
+                if(fabs(error.x) < 0.06 && fabs(error.y) < 0.06){
+
+                    z = robot_state.z + 0.2;
+
+                    if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03){
+
+                        z = robot_state.z + 0.5;
+
+                    }
+
+                }
+
+            }
+
+
+
+            comm.setX(sP.x);
+            comm.setY(sP.y);
+
         }
 
         count = 0;
@@ -126,8 +150,7 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
     }
 
-    comm.setX(sP.x);
-    comm.setX(sP.y);
+
     comm.setZ(z);
     autoCommand.push_back(comm);
     publish();
@@ -174,7 +197,7 @@ void AutoThread::move(double alpha){
     double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2) + pow(positionError[2],2));
 
     //Publish
-    if(true){//fabs(dist) < alpha){
+    if(fabs(dist) < alpha){
         comm.setX( x_node);
         comm.setY( y_node);
         comm.setZ( z_node);
@@ -256,6 +279,14 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
             else{
                 yawComm = robotHeading - PI/18;
             }
+
+            if (yawComm > PI){
+                yawComm = -yawComm + 2*PI/10;
+            }
+            if (yawComm < -PI){
+                yawComm = -yawComm - 2*PI/10;
+            }
+
         }
     }
     else{
@@ -269,8 +300,16 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
             if (diff >= 0)  sign = 1;
             else    sign = -1;
 
-            if (PI - fabs(diff) < fabs(diff)) sign = sign * -1;
 
+            if (PI - fabs(diff) < fabs(diff) && fabs(diff) > PI + PI/18) sign = sign * -1;
+
+            if (yawComm > PI){
+                yawComm = -yawComm + 2*PI/10;
+            }
+            if (yawComm < -PI){
+                yawComm = -yawComm - 2*PI/10;
+            }
+            qDebug() << sign;
             yawComm = robotHeading + sign * PI/18;
 
         }
