@@ -65,7 +65,7 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
-            target.y = nodeList[actualNode].p.y;
+            target.y = g::platform.y();//nodeList[actualNode].p.y;
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 

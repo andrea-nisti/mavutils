@@ -15,6 +15,7 @@
 namespace g {
     extern MavState state;
     extern MavState setPoint;
+    extern MavState platform;
 }
 
 extern std::vector <MavState> manualCommand;

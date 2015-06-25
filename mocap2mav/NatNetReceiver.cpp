@@ -175,7 +175,10 @@ void NatNetReceiver::_decodeData()
                    emit dataUpdate();
                 }
 
+               if(ID == 2) {
+                   g::platform.setPosition(x, z, -y);     //-z, x, -y
 
+                }
 
                // associated marker positions
                int nRigidMarkers = 0;  memcpy(&nRigidMarkers, ptr, 4); ptr += 4;

@@ -13,6 +13,8 @@
 namespace g {
     MavState state;
     MavState setPoint;
+    MavState platform;
+
 }
 
 PositionDispatcher::PositionDispatcher(QObject *parent) :

@@ -30,6 +30,9 @@ void ManualThread::run(){
     g::setPoint.setYaw(PI);
     sleep(4);
     */
+
+
+
     t.start();
     rate.start();
 
@@ -57,9 +60,9 @@ void ManualThread::run(){
         // land try
 
 
+        qDebug() << "set point: " << g::platform.x() << " " << g::platform.y() << " " << g::platform.z() ;
 
-
-        qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z() <<"yaw: "<<g::setPoint.yaw();
+        //qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z() <<"yaw: "<<g::setPoint.yaw();
         msleep(1000/r - (float)rate.elapsed());
 
 

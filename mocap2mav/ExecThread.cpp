@@ -55,12 +55,12 @@ ExecThread::ExecThread(QObject *parent) :
     rotate.p.x = 1.03;
     rotate.p.y = 1;
     rotate.p.yaw = 0;
-    nodeList.push_back(rotate);
+    //nodeList.push_back(rotate);
 
     move.a.type = 'm';
-    move.p.x = 1.0;
-    move.p.y = 1.0;
-    move.p.z =-1.8;
+    move.p.x = 0;
+    move.p.y = 0;
+    move.p.z =-0.8;
     nodeList.push_back(move);
 
     node land;
@@ -215,7 +215,7 @@ bool checkActions(char a){
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
            fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
 
-           if(++move_count == 3 * 120) executioner::move::move_done = true;
+           if(++move_count == 3 * 120); //executioner::move::move_done = true;
 
         }
         else{
