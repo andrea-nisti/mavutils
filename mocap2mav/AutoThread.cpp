@@ -104,19 +104,33 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
     float offset = nodeList[actualNode].a.params[1];
     float z = comm.z();
+
     bool descend_valid = false;
-    if(fabs(vz) < 0.01){
-        qDebug()<<"ending land: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
-        if(++land_count == land_wait * r_auto) executioner::land::landed = true;
+    if(fabs(vz) < 0.01 ){
+
+        z = z + 1;
+        if(++land_count == land_wait * r_auto) {
+
+
+            executioner::land::landed = true;
+
+        }
 
     }
     else{
 
         //Descending task
 
-        if (robot_state.z - offset >= - 0.4 ){
-            qDebug()<<"final stage: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
-            //z += speed * dt;
+        error.x = p.x - robot_state.x;
+        error.y = p.y - robot_state.y;
+
+        if (robot_state.z - offset >= - 0.20 ){
+
+            descend_valid = true;
+            sP.x = error.x * land_gain * 0.6 + p.x;
+            sP.y = error.y * land_gain * 0.6 + p.y;
+
+            z += speed*dt;
         }
         else{
 
@@ -124,9 +138,8 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
                 //Calculate error
 
-            error.x = p.x - robot_state.x;
-            error.y = p.y - robot_state.y;
-            qDebug()<<"descending: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
+
+            //qDebug()<<"descending: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
 
                 //Calculate corrected setpoint
 
@@ -209,6 +222,7 @@ void AutoThread::move(double alpha, position target, position robot_state){
         positionError[0] /= dist;
         positionError[1] /= dist;
         positionError[2] /= dist;
+
         //Calculate relative motion to actual position
         incrementVect[0] = positionError[0] * alpha;
         incrementVect[1] = positionError[1] * alpha;

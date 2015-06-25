@@ -173,7 +173,7 @@ void NatNetReceiver::_decodeData()
                    g::state.setPosition(x, z, -y);     //-z, x, -y
                    g::state.setOrientation(qw, qx, qz, -qy);
                    emit dataUpdate();
-               }
+                }
 
 
 

@@ -51,23 +51,25 @@ ExecThread::ExecThread(QObject *parent) :
 
     node rotate;
     rotate.a.type = 'r';
-    rotate.a.params[0] = 0; //angle_valid
-    rotate.p.x = 1;
+    rotate.a.params[0] = 1; //angle_valid
+    rotate.p.x = 1.03;
     rotate.p.y = 1;
+    rotate.p.yaw = 0;
     nodeList.push_back(rotate);
 
     move.a.type = 'm';
-    move.p.x = 1.018;
-    move.p.y = 1.072;
-    move.p.z =-1.5;
+    move.p.x = 1.0;
+    move.p.y = 1.0;
+    move.p.z =-1.8;
     nodeList.push_back(move);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 0.3; //height velocity
-    land.a.params[1] = 0.0; // offset
+    land.a.params[0] = 1.3; //height velocity
+    land.a.params[1] = - 0.713; // offset
     nodeList.push_back(land);
 
+    /*
     nodeList.push_back(node1);
     rotate.p.x = 0;
     rotate.p.y = 0;
@@ -86,7 +88,7 @@ ExecThread::ExecThread(QObject *parent) :
     move.p.z =-1.5;
     nodeList.push_back(move);
     nodeList.push_back(land);
-
+*/
 
 
 
