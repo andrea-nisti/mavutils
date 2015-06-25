@@ -11,7 +11,7 @@
 int count, rot_count;
 bool contRot_valid;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
-void calculateYawIntem2(double yawSP, double robotHeading, double &yawComm);
+
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
@@ -243,7 +243,7 @@ void AutoThread::rotate(){
 
     }
 
-    calculateYawIntem2(yawSP,robotHeading,yawComm);
+    calculateYawIntem(yawSP,robotHeading,yawComm);
 
     commRot.setYaw(yawComm);
     autoCommand.push_back(commRot);
@@ -263,62 +263,9 @@ void AutoThread::startMe(){
 
 
 
+
+
 void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
-
-    double diff = yawSP - robotHeading;
-    // Setpoint and actual state with same sign
-    if (yawSP*robotHeading > 0){
-
-        if (fabs(diff) < PI/10) yawComm = yawSP;
-        else{
-            //Increase or decrease yaw sp
-            rot_count = 0;
-            if (diff >= 0){
-                yawComm = robotHeading + PI/18;
-            }
-            else{
-                yawComm = robotHeading - PI/18;
-            }
-
-            if (yawComm > PI){
-                yawComm = -yawComm + 2*PI/10;
-            }
-            if (yawComm < -PI){
-                yawComm = -yawComm - 2*PI/10;
-            }
-
-        }
-    }
-    else{
-        //SP and state with different signs
-        int sign;
-        if (fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10) yawComm = yawSP;
-        else{
-            //Increase or decrease yaw sp
-            rot_count = 0;
-
-            if (diff >= 0)  sign = 1;
-            else    sign = -1;
-
-
-            if (PI - fabs(diff) < fabs(diff) && fabs(diff) > PI + PI/18) sign = sign * -1;
-
-            if (yawComm > PI){
-                yawComm = -yawComm + 2*PI/10;
-            }
-            if (yawComm < -PI){
-                yawComm = -yawComm - 2*PI/10;
-            }
-
-            yawComm = robotHeading + sign * PI/18;
-
-        }
-
-    }
-
-}
-
-void calculateYawIntem2(double yawSP,double robotHeading,double &yawComm){
 
     double yawSp_h = yawSP - robotHeading;
 
