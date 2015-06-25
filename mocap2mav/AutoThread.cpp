@@ -11,7 +11,7 @@
 int count, rot_count;
 bool contRot_valid;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
-
+void calculateYawIntem2(double yawSP, double robotHeading, double &yawComm);
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
@@ -121,22 +121,22 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
             sP.x = error.x * land_gain + p.x;
             sP.y = error.y * land_gain + p.y;
 
-                //wait to recenter
-            if(fabs(error.x) < 0.1 && fabs(error.y) < 0.1){
+            //wait to recenter
 
-                if(fabs(error.x) < 0.06 && fabs(error.y) < 0.06){
 
-                    z = robot_state.z + 0.2;
+            if(fabs(error.x) < 0.06 && fabs(error.y) < 0.06){
 
-                    if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03){
+                z = robot_state.z + 0.2;
 
-                        z = robot_state.z + 0.5;
+                if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03){
 
-                    }
+                    z = robot_state.z + 0.5;
 
                 }
 
             }
+
+
 
 
 
@@ -243,7 +243,7 @@ void AutoThread::rotate(){
 
     }
 
-    calculateYawIntem(yawSP,robotHeading,yawComm);
+    calculateYawIntem2(yawSP,robotHeading,yawComm);
 
     commRot.setYaw(yawComm);
     autoCommand.push_back(commRot);
@@ -309,7 +309,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
             if (yawComm < -PI){
                 yawComm = -yawComm - 2*PI/10;
             }
-            qDebug() << sign;
+
             yawComm = robotHeading + sign * PI/18;
 
         }
@@ -318,7 +318,39 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
 }
 
+void calculateYawIntem2(double yawSP,double robotHeading,double &yawComm){
 
+    double yawSp_h = yawSP - robotHeading;
+
+    if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
+    else if(fabs(yawSp_h) > PI - PI/18){
+        //Increase yaw
+        yawComm = robotHeading + PI / 18 ;
+        if (yawComm > PI){
+            yawComm = yawComm - 2*PI;
+        }
+    }
+    else{
+
+        if (yawSp_h > 0){
+            //Increase yaw
+            yawComm = robotHeading + PI / 18 ;
+            if (yawComm > PI){
+               yawComm = yawComm - 2*PI;
+            }
+
+        }
+        else{
+            //decrease yaw
+            yawComm -= PI / 18 ;
+            if (yawComm < -PI){
+              yawComm = -yawComm + 2*PI;
+            }
+        }
+
+    }
+
+}
 
 
 
