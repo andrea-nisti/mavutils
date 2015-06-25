@@ -8,7 +8,8 @@
 
 #include <cmath>
 #define PI 3.141592653589
-int count, rot_count;
+
+int land_count, rot_count;
 bool contRot_valid;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
 
@@ -26,7 +27,7 @@ void AutoThread::run(){
     MavState previous = g::state;
     MavState next;
     rate.start();
-    count = 0;
+    land_count = 0;
     rot_count = 0;
     double vz;
     contRot_valid = false;
@@ -61,7 +62,20 @@ void AutoThread::run(){
         //move
         if(executioner::move::move_sig){
 
-            move(move_alpha);
+            position target;
+
+            target.x = nodeList[actualNode].p.x;
+            target.y = nodeList[actualNode].p.y;
+            target.z = nodeList[actualNode].p.z;
+            target.yaw = nodeList[actualNode].p.yaw;
+
+            position state;
+            state.x = g::state.x();
+            state.y = g::state.y();
+            state.z = g::state.z();
+            state.yaw = g::state.getYaw();
+
+            move(move_alpha,target,state);
         }
 
         //rotate
@@ -90,31 +104,29 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
     float offset = nodeList[actualNode].a.params[1];
     float z = comm.z();
-
+    bool descend_valid = false;
     if(fabs(vz) < 0.01){
-        qDebug()<<"error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
-        if(++count == land_wait * r_auto) executioner::land::landed = true;
+        qDebug()<<"ending land: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
+        if(++land_count == land_wait * r_auto) executioner::land::landed = true;
 
     }
     else{
 
-
-
         //Descending task
 
-
-        if (robot_state.z >= - 0.2 - offset){
-            qDebug()<<"error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
-            z += speed * dt;
+        if (robot_state.z - offset >= - 0.4 ){
+            qDebug()<<"final stage: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
+            //z += speed * dt;
         }
         else{
+
          //Centering task
 
                 //Calculate error
 
             error.x = p.x - robot_state.x;
             error.y = p.y - robot_state.y;
-            qDebug()<<"error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
+            qDebug()<<"descending: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
 
                 //Calculate corrected setpoint
 
@@ -124,20 +136,9 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
             //wait to recenter
 
 
-            if(fabs(error.x) < 0.06 && fabs(error.y) < 0.06){
+            if(fabs(error.x) < 0.06 && fabs(error.y) < 0.06){ z = robot_state.z + 0.2; descend_valid = true;}
 
-                z = robot_state.z + 0.2;
-
-                if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03){
-
-                    z = robot_state.z + 0.5;
-
-                }
-
-            }
-
-
-
+            else if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03){ z = robot_state.z + 0.4; descend_valid = true;}
 
 
             comm.setX(sP.x);
@@ -145,13 +146,12 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
         }
 
-        count = 0;
+        land_count = 0;
         executioner::land::landed = false;
 
     }
 
-
-    comm.setZ(z);
+    if(descend_valid) comm.setZ(z);
     autoCommand.push_back(comm);
     publish();
 
@@ -174,21 +174,21 @@ void AutoThread::takeOff(){
 }
 
 
-void AutoThread::move(double alpha){
+void AutoThread::move(double alpha, position target, position robot_state){
 
     MavState comm = g::setPoint;
 
     //Loading parameters
-    double x_node = nodeList[actualNode].p.x;
-    double y_node = nodeList[actualNode].p.y;
-    double z_node = nodeList[actualNode].p.z;
-    double yaw = nodeList[actualNode].p.yaw;
+    double x_node = target.x;
+    double y_node = target.y;
+    double z_node = target.z;
+    double yaw = target.yaw;
 
     //Save actual state
-    double x_robot = g::state.x();
-    double y_robot = g::state.y();
-    double z_robot = g::state.z();
-    double yaw_robot = g::state.getYaw();
+    double x_robot = robot_state.x;
+    double y_robot = robot_state.y;
+    double z_robot = robot_state.z;
+    double yaw_robot = robot_state.yaw;
 
     //Calculate error vector
     double positionError[3] = {x_node - x_robot , y_node - y_robot , z_node - z_robot};

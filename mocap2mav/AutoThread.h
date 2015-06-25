@@ -12,7 +12,7 @@ public:
     explicit AutoThread(QObject *parent = 0);
     void land(float speed, float dt, double vz, position p, position robot_state);
     void takeOff();
-    void move(double alpha);
+    void move(double alpha, position target, position robot_state);
     void rotate();
 signals:
     void publish();
