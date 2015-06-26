@@ -14,9 +14,11 @@ public:
     CommanderThread commanderThr;
 signals:
 
+
 public slots:
 
     void checkCommands();
+
 
 };
 

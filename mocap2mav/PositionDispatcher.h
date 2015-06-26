@@ -7,7 +7,7 @@
 
 #include <mavlink/common/mavlink.h>
 
-//#include<ManualControl.h>
+
 
 class PositionDispatcher : public QObject
 {
@@ -21,6 +21,7 @@ signals:
 
 public slots:
     void sendPosition();
+
 
 private:
     QSerialPort _serial;

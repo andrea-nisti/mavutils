@@ -34,6 +34,7 @@ std::vector<node> nodeList;
 int actualNode = 0;
 
 
+
 bool checkActions(char a);
 void signalsReset();
 bool can_run = false;
@@ -55,44 +56,29 @@ ExecThread::ExecThread(QObject *parent) :
     rotate.p.x = 1.03;
     rotate.p.y = 1;
     rotate.p.yaw = 0;
-    nodeList.push_back(rotate);
+    //nodeList.push_back(rotate);
 
     move.a.type = 'm';
     move.p.x = 1.0;
-    move.p.y = 1.0;
-    move.p.z =-1.8;
+    move.p.y = 0;
+    move.p.z = -1;
+    nodeList.push_back(move);
+
+    move.p.x = 1;
+    move.p.y = -1;
+    move.p.z =-0.8;
+    nodeList.push_back(move);
+
+    move.p.x = 0;
+    move.p.y = 0;
+    move.p.z =-1;
     nodeList.push_back(move);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 1.3; //height velocity
-    land.a.params[1] = - 0.713; // offset
+    land.a.params[0] = 0.4; //height velocity
+    land.a.params[1] = 0; // offset
     nodeList.push_back(land);
-
-    /*
-    nodeList.push_back(node1);
-    rotate.p.x = 0;
-    rotate.p.y = 0;
-    nodeList.push_back(rotate);
-
-    move.p.x = 0.5;
-    move.p.y = -0.5;
-    move.p.z = -1;
-    nodeList.push_back(move);
-
-    rotate.a.params[0] = 1;
-    rotate.p.yaw = 0;
-    nodeList.push_back(rotate);
-    move.p.x = 1.018;
-    move.p.y = 1.072;
-    move.p.z =-1.5;
-    nodeList.push_back(move);
-    nodeList.push_back(land);
-*/
-
-
-
-
 
     if(nodeList.size()>0){
 
