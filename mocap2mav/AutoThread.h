@@ -15,7 +15,7 @@ public:
     void takeOff();
     void move(double alpha, position target, position robot_state);
     void rotate();
-    void circle(double omega,double rad,double c[2],float dt,int secs);
+    void circle(double omega,double rad,double c[2],float t,int secs);
 signals:
     void publish();
 

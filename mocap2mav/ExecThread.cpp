@@ -62,15 +62,6 @@ ExecThread::ExecThread(QObject *parent) :
     rotate.p.yaw = PI;
     nodeList.push_back(rotate);
 
-
-    node circle;
-    circle.a.type = 'c';
-    circle.a.params[0] = 0.4; //omega;
-    circle.a.params[1] = 0.5; //radius
-    circle.a.params[2] = 20; //seconds
-    nodeList.push_back(circle);
-
-
     move.a.type = 'm';
     move.p.x = 0;
     move.p.y = 0;
@@ -201,8 +192,8 @@ void ExecThread::run(){
 
             if(!executioner::circle::was_executing){
 
-                nodeList[actualNode].p.x = g::setPoint.x();
-                nodeList[actualNode].p.y = g::setPoint.y();
+                //nodeList[actualNode].p.x = g::setPoint.x();
+                //nodeList[actualNode].p.y = g::setPoint.y();
                 executioner::circle::was_executing = true;
 
             }

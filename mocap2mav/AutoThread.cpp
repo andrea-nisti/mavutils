@@ -21,20 +21,22 @@ AutoThread::AutoThread(QObject *parent) :
 void AutoThread::run(){
 
     QTime rate;
-
+    QTime t_circle;
     qDebug() << "automatic from: " << QThread::currentThreadId();
     MavState previous = g::state;
     MavState next;
+    t_circle.start();
     rate.start();
     land_count = 0;
     rot_count = 0;
     double vz;
-
+    bool t_circle_started = false;
     while (true) {
 
         next = g::state;
 
         vz = r_auto * (next.z() - previous.z()) ;
+
 
         //takeoff
         if(executioner::take_off::take_off_sig){
@@ -85,11 +87,14 @@ void AutoThread::run(){
         //Circle
         if(executioner::circle::circle_sig){
 
+            if(!executioner::circle::was_executing){ t_circle.restart(); }
+
             double omega = nodeList[actualNode].a.params[0];
             double radius = nodeList[actualNode].a.params[1];
             double secs = nodeList[actualNode].a.params[2];
             double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
-            circle(omega,radius,c,(float)1/r_auto,secs);
+
+            circle(omega,radius,c,t_circle.elapsed()/1000,secs);
         }
 
 
@@ -280,21 +285,21 @@ void AutoThread::rotate(){
 
 }
 
-void AutoThread::circle(double omega,double rad,double c[2],float dt,int secs){
+void AutoThread::circle(double omega,double rad,double c[2],float t,int secs){
 
     MavState comm = g::setPoint;
 
       // Circular trajectory
 
-    double x_sp = c[0] + rad*cos(omega * dt);
-    double y_sp = c[1] + rad*sin(omega * dt);
+    double x_sp = c[0] + rad*cos(omega * t);
+    double y_sp = c[1] + rad*sin(omega * t);
     double yawSP = atan2(c[0] - g::state.y(),c[1] - g::state.x());
     double yawComm;
-    calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+    //calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
 
     comm.setX(x_sp);
     comm.setY(y_sp);
-    comm.setYaw(yawComm);
+    //comm.setYaw(yawComm);
 
 
     autoCommand.push_back(comm);
