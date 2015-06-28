@@ -314,19 +314,24 @@ void AutoThread::startMe(){
 
 void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
+
     double yawSp_h = yawSP - robotHeading;
+
+    if(yawSp_h > PI ) yawSp_h = yawSp_h - 2*PI;
+    else if (yawSp_h < -PI) yawSp_h= yawSp_h + 2*PI;
 
     if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
     else if(fabs(yawSp_h) > PI - PI/18){
         //Increase yaw
-        rot_count = 0;
+        //rot_count = 0;
         yawComm = robotHeading + PI / 18 ;
         if (yawComm > PI){
             yawComm = yawComm - 2*PI;
         }
     }
     else{
-        rot_count = 0;
+        //rot_count = 0;
+
         if (yawSp_h > 0){
             //Increase yaw
             yawComm = robotHeading + PI / 18 ;
@@ -346,6 +351,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
     }
 
 }
+
 
 
 
