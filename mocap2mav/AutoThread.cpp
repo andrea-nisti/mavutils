@@ -9,8 +9,7 @@
 #include <cmath>
 #define PI 3.141592653589
 
-int land_count, rot_count;
-bool contRot_valid;
+int land_count = 0;int rot_count = 0;int circle_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
 
 AutoThread::AutoThread(QObject *parent) :
@@ -30,7 +29,7 @@ void AutoThread::run(){
     land_count = 0;
     rot_count = 0;
     double vz;
-    contRot_valid = false;
+
     while (true) {
 
         next = g::state;
@@ -82,6 +81,15 @@ void AutoThread::run(){
         if(executioner::rotate::rotate_sig){
 
             rotate();
+        }
+        //Circle
+        if(executioner::circle::circle_sig){
+
+            double omega = nodeList[actualNode].a.params[0];
+            double radius = nodeList[actualNode].a.params[1];
+            double secs = nodeList[actualNode].a.params[2];
+            double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
+            circle(omega,radius,c,(float)1/r_auto,secs);
         }
 
 
@@ -263,11 +271,36 @@ void AutoThread::rotate(){
     autoCommand.push_back(commRot);
     publish();
 
-    if(++rot_count == rot_wait * r_auto && fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10){
-        executioner::rotate::rotate_done = true; rot_count = 0;
+    if( fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10){
+        qDebug() << "done rotation" ;
+        executioner::rotate::rotate_done = true;
         rot_count = 0;
     }
 
+
+}
+
+void AutoThread::circle(double omega,double rad,double c[2],float dt,int secs){
+
+    MavState comm = g::setPoint;
+
+      // Circular trajectory
+
+    double x_sp = c[0] + rad*cos(omega * dt);
+    double y_sp = c[1] + rad*sin(omega * dt);
+    double yawSP = atan2(c[0] - g::state.y(),c[1] - g::state.x());
+    double yawComm;
+    calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+
+    comm.setX(x_sp);
+    comm.setY(y_sp);
+    comm.setYaw(yawComm);
+
+
+    autoCommand.push_back(comm);
+    publish();
+
+    if(++circle_count >= secs * r_auto){ executioner::circle::circle_done = true; circle_count = 0;}
 
 }
 
@@ -281,19 +314,24 @@ void AutoThread::startMe(){
 
 void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
+
     double yawSp_h = yawSP - robotHeading;
+
+    if(yawSp_h > PI ) yawSp_h = yawSp_h - 2*PI;
+    else if (yawSp_h < -PI) yawSp_h= yawSp_h + 2*PI;
 
     if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
     else if(fabs(yawSp_h) > PI - PI/18){
         //Increase yaw
-        rot_count = 0;
+        //rot_count = 0;
         yawComm = robotHeading + PI / 18 ;
         if (yawComm > PI){
             yawComm = yawComm - 2*PI;
         }
     }
     else{
-        rot_count = 0;
+        //rot_count = 0;
+
         if (yawSp_h > 0){
             //Increase yaw
             yawComm = robotHeading + PI / 18 ;

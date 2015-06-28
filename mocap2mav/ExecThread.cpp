@@ -27,6 +27,11 @@ namespace executioner{
        bool rotate_done;
        int rotate_id;
     }
+    namespace circle{
+       bool circle_sig;
+       bool circle_done;
+       bool was_executing;
+    }
 
 }
 
@@ -54,19 +59,28 @@ ExecThread::ExecThread(QObject *parent) :
     rotate.a.params[0] = 1; //angle_valid
     rotate.p.x = 1.03;
     rotate.p.y = 1;
-    rotate.p.yaw = 0;
-    //nodeList.push_back(rotate);
+    rotate.p.yaw = PI;
+    nodeList.push_back(rotate);
+
+
+    node circle;
+    circle.a.type = 'c';
+    circle.a.params[0] = 0.4; //omega;
+    circle.a.params[1] = 0.5; //radius
+    circle.a.params[2] = 20; //seconds
+    nodeList.push_back(circle);
+
 
     move.a.type = 'm';
     move.p.x = 0;
     move.p.y = 0;
     move.p.z =-0.8;
-    nodeList.push_back(move);
+    //nodeList.push_back(move);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 1.3; //height velocity
-    land.a.params[1] = - 0.713; // offset
+    land.a.params[0] = 0.4; //height velocity
+    land.a.params[1] =  0.0; // offset
     nodeList.push_back(land);
 
     /*
@@ -152,8 +166,8 @@ void ExecThread::run(){
             //Land on previous move position
             if(!executioner::land::was_executing){
 
-                nodeList[actualNode].p.x = nodeList[actualNode - 1].p.x;
-                nodeList[actualNode].p.y = nodeList[actualNode - 1].p.y;
+                nodeList[actualNode].p.x = g::setPoint.x();
+                nodeList[actualNode].p.y = g::setPoint.y();
 
                 qDebug() << "Landing on: "<<nodeList[actualNode].p.x<<" "<<nodeList[actualNode].p.y;
 
@@ -181,6 +195,18 @@ void ExecThread::run(){
         case 'r':
             executioner::rotate::rotate_id = actualNode;
             executioner::rotate::rotate_sig = true;
+            break;
+
+        case 'c':
+
+            if(!executioner::circle::was_executing){
+
+                nodeList[actualNode].p.x = g::setPoint.x();
+                nodeList[actualNode].p.y = g::setPoint.y();
+                executioner::circle::was_executing = true;
+
+            }
+            executioner::circle::circle_sig = true;
             break;
         default:
             break;
@@ -252,7 +278,11 @@ bool checkActions(char a){
         return executioner::rotate::rotate_done;
 
         break;
+     case 'c':
 
+        return executioner::circle::circle_done;
+
+        break;
 
 
 
@@ -268,13 +298,20 @@ void signalsReset(){
     executioner::land::landed = false;
     executioner::land::land_sig = false;
     executioner::land::was_executing = false;
+
     executioner::take_off::take_off_sig = false;
     executioner::take_off::take_off_done = false;
     executioner::take_off::was_executing = false;
+
     executioner::move::move_done = false;
     executioner::move::move_sig = false;
+
     executioner::rotate::rotate_done = false;
     executioner::rotate::rotate_sig = false;
+
+    executioner::circle::circle_done = false;
+    executioner::circle::circle_sig = false;
+    executioner::circle::was_executing = false;
 
 }
 

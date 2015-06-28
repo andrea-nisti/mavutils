@@ -47,6 +47,12 @@ namespace executioner{
       extern int rotate_id;
     }
 
+    namespace circle{
+      extern bool circle_sig;
+      extern bool circle_done;
+      extern bool was_executing;
+    }
+
 
 
 }
