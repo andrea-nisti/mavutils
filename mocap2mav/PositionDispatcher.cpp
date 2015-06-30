@@ -8,7 +8,7 @@
 #include "MavState.h"
 #include "NatNetReceiver.h"
 #include "global.h"
-#define DISPATCH_INTERVAL 80 //ms
+#define DISPATCH_INTERVAL 100 //ms
 
 namespace g {
     MavState state;
@@ -86,8 +86,8 @@ void PositionDispatcher::sendPosition()
                     g::setPoint.x(),
                     g::setPoint.y(),
                     g::setPoint.z(),
-                    0.1, //rad
-                    0, //rad
+                    5, //rate saturation
+                    0.5, //Rate gain
                     g::setPoint.yaw()); //rad
          _sendMavlinkMessage(&msg2);
          //qDebug() << "Sent position target";

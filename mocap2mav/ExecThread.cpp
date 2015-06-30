@@ -45,32 +45,24 @@ ExecThread::ExecThread(QObject *parent) :
 
     node node1;
     node1.a.type = 't';
-    node1.a.params[0] = -1.5; //height
+    node1.a.params[0] = -1; //height
     nodeList.push_back(node1);
 
     node move;
 
-    node rotate;
-    rotate.a.type = 'r';
-    rotate.a.params[0] = 1; //angle_valid
-    rotate.p.x = 1.03;
-    rotate.p.y = 1;
-    rotate.p.yaw = 0;
-    //nodeList.push_back(rotate);
-
     move.a.type = 'm';
-    move.p.x = 1.0;
-    move.p.y = 0;
+    move.p.x = 1;
+    move.p.y = 1;
     move.p.z = -1;
+    nodeList.push_back(move);
+
+    move.p.x = -0.5;
+    move.p.y = 0;
+    move.p.z =-1;
     nodeList.push_back(move);
 
     move.p.x = 1;
     move.p.y = -1;
-    move.p.z =-0.8;
-    nodeList.push_back(move);
-
-    move.p.x = 0;
-    move.p.y = 0;
     move.p.z =-1;
     nodeList.push_back(move);
 
