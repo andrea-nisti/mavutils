@@ -20,6 +20,10 @@ namespace g {
 
 extern std::vector <MavState> manualCommand;
 extern std::vector <MavState> autoCommand;
+extern std::vector<node> nodeList;
+extern int actualNode;
+
+
 
 namespace executioner{
     namespace land{
@@ -57,8 +61,7 @@ namespace executioner{
 
 }
 
-extern std::vector<node> nodeList;
-extern int actualNode;
+
 
 
 

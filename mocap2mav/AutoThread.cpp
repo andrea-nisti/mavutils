@@ -74,7 +74,7 @@ void AutoThread::run(){
             state.z = g::state.z();
             state.yaw = g::state.getYaw();
 
-            move(move_alpha,target,state);
+            move2(move_alpha,target,state,(float)1/r_auto);
         }
 
         //rotate
@@ -199,46 +199,34 @@ void AutoThread::move(double alpha, position target, position robot_state){
 
     MavState comm = g::setPoint;
 
-    //Loading parameters
-    double x_node = target.x;
-    double y_node = target.y;
-    double z_node = target.z;
-    double yaw = target.yaw;
-
-    //Save actual state
-    double x_robot = robot_state.x;
-    double y_robot = robot_state.y;
-    double z_robot = robot_state.z;
-    double yaw_robot = robot_state.yaw;
-
     //Calculate error vector
-    double positionError[3] = {x_node - x_robot , y_node - y_robot , z_node - z_robot};
+    double positionError[3] = {target.x - robot_state.x ,target.y - robot_state.y , target.z - robot_state.z};
     double incrementVect[3];
 
-    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2) + pow(positionError[2],2));
+    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2)); //+ pow(positionError[2],2));
 
     //Publish
-    if(fabs(dist) < alpha){
-        comm.setX( x_node);
-        comm.setY( y_node);
-        comm.setZ( z_node);
+    if(true){//fabs(dist) <= alpha){
+        comm.setX( target.x);
+        comm.setY( target.y);
+        comm.setZ( target.z);
     }
 
-    else if(fabs(dist) >= alpha){
+    else if(fabs(dist) > alpha){
 
         //Normalize
-        positionError[0] /= dist;
-        positionError[1] /= dist;
-        positionError[2] /= dist;
+        positionError[0] = positionError[0] / dist;
+        positionError[1] = positionError[1] / dist;
+        positionError[2] = positionError[2] / dist;
 
         //Calculate relative motion to actual position
-        incrementVect[0] = positionError[0] * alpha;
+        incrementVect[0] = positionError[0] * alpha ;
         incrementVect[1] = positionError[1] * alpha;
         incrementVect[2] = positionError[2] * alpha;
 
-        comm.setX(x_robot + incrementVect[0]);
-        comm.setY(y_robot + incrementVect[1]);
-        comm.setZ(z_robot + incrementVect[2]);
+        comm.setX(robot_state.x + incrementVect[0]);
+        comm.setY(robot_state.y + incrementVect[1]);
+        comm.setZ(robot_state.z + incrementVect[2]);
 
     }
 
@@ -246,6 +234,51 @@ void AutoThread::move(double alpha, position target, position robot_state){
     publish();
 
 }
+
+void AutoThread::move2(double alpha, position target, position robot_state,float dt){
+
+    MavState comm = g::setPoint;
+
+    //Calculate error vector
+    double positionError[3] = {target.x - comm.x() ,target.y - comm.y() , target.z - comm.z()};
+    double incrementVect[3];
+
+    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2) + pow(positionError[2],2));
+
+    //Publish
+    if(fabs(dist) <= alpha){
+        comm.setX( target.x);
+        comm.setY( target.y);
+        comm.setZ( target.z);
+    }
+
+    else if(fabs(dist) > alpha){
+
+        //XXX Change alpha according to y/xs
+
+        //Normalize
+        positionError[0] = positionError[0] / dist;
+        positionError[1] = positionError[1] / dist;
+        positionError[2] = positionError[2] / dist;
+
+        //Calculate relative motion to actual position
+        incrementVect[0] = positionError[0] * alpha * dt;
+        incrementVect[1] = positionError[1] * alpha * dt;
+        incrementVect[2] = positionError[2] * alpha * dt;
+
+        //comm.x += incrementVect[0] ?
+
+        comm.setX(comm.x() + incrementVect[0]);
+        comm.setY(comm.y() + incrementVect[1]);
+        comm.setZ(comm.z() + incrementVect[2]);
+
+    }
+
+    autoCommand.push_back(comm);
+    publish();
+
+}
+
 
 void AutoThread::rotate(){
 
@@ -351,6 +384,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
     }
 
 }
+
 
 
 
