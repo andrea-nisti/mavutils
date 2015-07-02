@@ -55,14 +55,9 @@ ExecThread::ExecThread(QObject *parent) :
 
     node move;
 
-
-
-    nodeList.push_back(node1);
-
-
     move.a.type = 'm';
-    move.p.x = 1;
-    move.p.y = 1;
+    move.p.x = 0.4;
+    move.p.y = 0;
     move.p.z = -1;
     nodeList.push_back(move);
 

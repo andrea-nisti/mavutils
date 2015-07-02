@@ -8,7 +8,7 @@
 #include "global.h"
 #include "CommanderThread.h"
 #include <QThread>
-#include "MainControl.h"
+
 #include "Commander.h"
 #include "utils.h"
 #include "Automatic.h"

@@ -11,6 +11,7 @@ class AutoThread : public QThread
     void run();
 public:
     explicit AutoThread(QObject *parent = 0);
+    ~AutoThread();
     void land(float speed, float dt, double vz, position p, position robot_state);
     void takeOff();
     void move(double alpha, position target, position robot_state);

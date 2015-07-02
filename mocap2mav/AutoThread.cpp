@@ -3,7 +3,9 @@
 #include "MavState.h"
 #include "global.h"
 #include "utils.h"
-
+#include <iostream>
+#include<ostream>
+#include <fstream>
 #include "params.h"
 
 #include <cmath>
@@ -11,10 +13,18 @@
 
 int land_count = 0;int rot_count = 0;int circle_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
-
+std::ofstream output;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
+    output.open("output.txt");
+
+}
+
+AutoThread::~AutoThread()
+
+{
+    output.close();
 
 }
 
@@ -24,18 +34,26 @@ void AutoThread::run(){
 
     qDebug() << "automatic from: " << QThread::currentThreadId();
     MavState previous = g::state;
-    MavState next;
+    MavState previous_platform = g::platform;
+    MavState next, next_platform;
     rate.start();
     land_count = 0;
     rot_count = 0;
-    double vz;
+    double vz = 0;
+    double vx = 0;
+    double vy = 0;
+    float vy_platform = 0;
 
     while (true) {
 
         next = g::state;
+        next_platform = g::platform;
+
 
         vz = r_auto * (next.z() - previous.z()) ;
-
+        vx = r_auto * (next.x() - previous.x()) ;
+        vz = r_auto * (next.y() - previous.y()) ;
+        vy_platform = r_auto * (next_platform.y() - previous_platform.y()) ;
         //takeoff
         if(executioner::take_off::take_off_sig){
                 takeOff();
@@ -64,7 +82,6 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
-            target.y = g::platform.y();//nodeList[actualNode].p.y;
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 
@@ -74,7 +91,10 @@ void AutoThread::run(){
             state.z = g::state.z();
             state.yaw = g::state.getYaw();
 
-            move2(move_alpha,target,state,(float)1/r_auto);
+            float err = g::platform.y() - g::state.y();
+            target.y = g::platform.y() + (float)0.0 * err + (float)0.5*vy_platform;
+
+            move(move_alpha,target,state);
         }
 
         //rotate
@@ -92,14 +112,29 @@ void AutoThread::run(){
             circle(omega,radius,c,(float)1/r_auto,secs);
         }
 
+        //Logging
+
+        //Writing output file
+
+        float roll,pitch,yaw;
+        g::state.orientation2(&roll,&pitch,&yaw);
+
+
+        output << vx <<" "<<vy<<" "<<vz<<" "<<roll<<" "<<pitch << " " << yaw;
+        output << ";\n";
+
 
         previous = next;
-
+        previous_platform = next_platform;
         msleep(1000/r_auto - (float)rate.elapsed());
         rate.restart();
 
 
     }
+
+
+
+
 
 }
 
@@ -356,14 +391,14 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
     if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
     else if(fabs(yawSp_h) > PI - PI/18){
         //Increase yaw
-        //rot_count = 0;
+
         yawComm = robotHeading + PI / 18 ;
         if (yawComm > PI){
             yawComm = yawComm - 2*PI;
         }
     }
     else{
-        //rot_count = 0;
+
 
         if (yawSp_h > 0){
             //Increase yaw
@@ -386,7 +421,9 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 }
 
 
+void log(float a,float b){
 
+}
 
 
 
