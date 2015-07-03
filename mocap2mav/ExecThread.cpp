@@ -37,7 +37,7 @@ namespace executioner{
 
 std::vector<node> nodeList;
 int actualNode = 0;
-
+int r_exec = 120; //Hz
 
 
 bool checkActions(char a);
@@ -55,15 +55,31 @@ ExecThread::ExecThread(QObject *parent) :
 
     node move;
 
+    node rotate;
+    rotate.a.type = 'r';
+    rotate.a.params[0] = 1;
+    rotate.p.yaw = 0;
+    nodeList.push_back(rotate);
+
     move.a.type = 'm';
-    move.p.x = 0.4;
+    move.p.x = 1;
+    move.p.y = 0;
+    move.p.z = -1;
+    nodeList.push_back(move);
+
+    move.p.x = -1;
+    move.p.y = 0;
+    move.p.z = -1;
+    nodeList.push_back(move);
+
+    move.p.x = 1;
     move.p.y = 0;
     move.p.z = -1;
     nodeList.push_back(move);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 0.4; //height velocity
+    land.a.params[0] = 2; //height velocity
     land.a.params[1] = 0; // offset
     nodeList.push_back(land);
 
@@ -92,8 +108,6 @@ void ExecThread::run(){
      */
 
     QTime rate;
-    int r_exec = 120; //Hz
-
 
     qDebug() << "executioner from: " << QThread::currentThreadId();
 
@@ -200,7 +214,7 @@ bool checkActions(char a){
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
            fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
 
-           if(++move_count == 3 * 120); //executioner::move::move_done = true;
+           if(++move_count == 4 * 120)  {move_count = 0; executioner::move::move_done = true;}
 
         }
         else{

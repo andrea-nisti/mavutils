@@ -11,7 +11,7 @@
 #include <cmath>
 #define PI 3.141592653589
 
-int land_count = 0;int rot_count = 0;int circle_count = 0;
+int land_count = 0;int rot_count = 0;int circle_count = 0; int descent_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
 std::ofstream output;
 AutoThread::AutoThread(QObject *parent) :
@@ -42,6 +42,9 @@ void AutoThread::run(){
     double vz = 0;
     double vx = 0;
     double vy = 0;
+    double e_x = 0;
+    double e_y = 0;
+    double e_z = 0;
     float vy_platform = 0;
 
     while (true) {
@@ -52,7 +55,7 @@ void AutoThread::run(){
 
         vz = r_auto * (next.z() - previous.z()) ;
         vx = r_auto * (next.x() - previous.x()) ;
-        vz = r_auto * (next.y() - previous.y()) ;
+        vy = r_auto * (next.y() - previous.y()) ;
         vy_platform = r_auto * (next_platform.y() - previous_platform.y()) ;
         //takeoff
         if(executioner::take_off::take_off_sig){
@@ -82,6 +85,7 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
+            target.y = nodeList[actualNode].p.y;
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 
@@ -89,10 +93,12 @@ void AutoThread::run(){
             state.x = g::state.x();
             state.y = g::state.y();
             state.z = g::state.z();
-            state.yaw = g::state.getYaw();
 
-            float err = g::platform.y() - g::state.y();
-            target.y = g::platform.y() + (float)0.0 * err + (float)0.5*vy_platform;
+            e_x = g::setPoint.x() - g::state.x();
+            e_y = g::setPoint.y() - g::state.y();
+            e_z = g::setPoint.z() - g::state.z();
+
+            state.yaw = g::state.getYaw();
 
             move(move_alpha,target,state);
         }
@@ -120,7 +126,14 @@ void AutoThread::run(){
         g::state.orientation2(&roll,&pitch,&yaw);
 
 
-        output << vx <<" "<<vy<<" "<<vz<<" "<<roll<<" "<<pitch << " " << yaw;
+        output <<g::state.x()<<" "<<g::state.y()<<" "<<g::state.z()<< //Position
+            " "<<g::setPoint.x()<<" "<<g::setPoint.y()<<" "<<g::setPoint.z()<< //Position SetPoint
+
+                 " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
+                 vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
+                roll<<" "<<pitch << " " << yaw ;                     //Attitude
+
+
         output << ";\n";
 
 
@@ -129,12 +142,7 @@ void AutoThread::run(){
         msleep(1000/r_auto - (float)rate.elapsed());
         rate.restart();
 
-
     }
-
-
-
-
 
 }
 
@@ -144,17 +152,18 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
     MavState comm = g::setPoint;
     position error, sP;
+    float descending_rate = 0;
 
     float offset = nodeList[actualNode].a.params[1];
     float z = comm.z();
 
     bool descend_valid = false;
-    if(fabs(vz) < 0.01 ){
+    if(fabs(vz) < 0.01 && robot_state.z - offset >= - 0.10){
 
-        z = z + 1;
+
         if(++land_count == land_wait * r_auto) {
 
-
+            land_count = 0;
             executioner::land::landed = true;
 
         }
@@ -167,11 +176,19 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
         error.x = p.x - robot_state.x;
         error.y = p.y - robot_state.y;
 
-        if (robot_state.z - offset >= - 0.20 ){
+        if (robot_state.z - offset >= - 0.15 ){
 
-            descend_valid = true;
-            sP.x = error.x * land_gain * 0.6 + p.x;
-            sP.y = error.y * land_gain * 0.6 + p.y;
+            if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03) {
+
+              descend_valid = true;
+
+            }
+            else speed = 0;
+            sP.x = error.x * land_gain * 0.7 + p.x;
+            sP.y = error.y * land_gain * 0.7 + p.y;
+
+            comm.setX(sP.x);
+            comm.setY(sP.y);
 
             z += speed*dt;
         }
@@ -181,9 +198,6 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
                 //Calculate error
 
-
-            //qDebug()<<"descending: error" << error.x <<" " <<error.y <<"P: " << p.x <<" " <<p.y;
-
                 //Calculate corrected setpoint
 
             sP.x = error.x * land_gain + p.x;
@@ -192,11 +206,11 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
             //wait to recenter
 
 
-            if(fabs(error.x) < 0.06 && fabs(error.y) < 0.06){ z = robot_state.z + 0.2; descend_valid = true;}
+            if(fabs(error.x) < 0.08 && fabs(error.y) < 0.08){ z = g::state.z() + 0.3; descend_valid = true;}
 
-            else if(fabs(error.x) < 0.03 && fabs(error.y) < 0.03){ z = robot_state.z + 0.4; descend_valid = true;}
+            else if(fabs(error.x) < 0.05 && fabs(error.y) < 0.05){ z = g::state.z() + 0.5; descend_valid = true;}
 
-
+            //z += descending_rate * dt;
             comm.setX(sP.x);
             comm.setY(sP.y);
 
@@ -340,9 +354,14 @@ void AutoThread::rotate(){
     publish();
 
     if( fabs(fabs(yawSP) - fabs(robotHeading)) < PI/10){
-        qDebug() << "done rotation" ;
-        executioner::rotate::rotate_done = true;
-        rot_count = 0;
+
+        if(++rot_count == rot_wait * r_auto){
+
+            qDebug() << "done rotation" ;
+            rot_count = 0;
+            executioner::rotate::rotate_done = true;
+
+        }
     }
 
 
@@ -391,7 +410,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
     if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
     else if(fabs(yawSp_h) > PI - PI/18){
         //Increase yaw
-
+        rot_count = 0;
         yawComm = robotHeading + PI / 18 ;
         if (yawComm > PI){
             yawComm = yawComm - 2*PI;
