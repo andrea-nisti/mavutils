@@ -31,12 +31,13 @@ AutoThread::~AutoThread()
 void AutoThread::run(){
 
     QTime rate;
+    QTime timer;
 
     qDebug() << "automatic from: " << QThread::currentThreadId();
     MavState previous = g::state;
     MavState previous_platform = g::platform;
     MavState next, next_platform;
-    rate.start();
+
     land_count = 0;
     rot_count = 0;
     double vz = 0;
@@ -46,7 +47,8 @@ void AutoThread::run(){
     double e_y = 0;
     double e_z = 0;
     float vy_platform = 0;
-
+    timer.start();
+    rate.start();
     while (true) {
 
         next = g::state;
@@ -135,6 +137,9 @@ void AutoThread::run(){
 
 
         output << ";\n";
+
+        qDebug() << (float)timer.elapsed();
+        timer.restart();
 
 
         previous = next;
@@ -279,8 +284,8 @@ void AutoThread::move(double alpha, position target, position robot_state){
 
     }
 
-    autoCommand.push_back(comm);
-    publish();
+
+    g::setPoint = comm;
 
 }
 
@@ -384,8 +389,7 @@ void AutoThread::circle(double omega,double rad,double c[2],float dt,int secs){
     comm.setYaw(yawComm);
 
 
-    autoCommand.push_back(comm);
-    publish();
+    g::setPoint = comm;
 
     if(++circle_count >= secs * r_auto){ executioner::circle::circle_done = true; circle_count = 0;}
 

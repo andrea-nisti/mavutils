@@ -155,12 +155,7 @@ inline float rad2deg(float rad)
 {
     return rad*RAD2DEG;
 }
-/*
-namespace g
-{
-extern MavState state;
-}
-*/
+
 
 #endif // MAVSTATE_H
 
