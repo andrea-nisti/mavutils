@@ -22,6 +22,7 @@ AutoThread::AutoThread(QObject *parent) :
 {
     output.open("output.txt");
 
+
 }
 
 AutoThread::~AutoThread()
@@ -108,7 +109,7 @@ void AutoThread::run(){
 
             plat_error = target.y - state.y;
             error_int += plat_error;
-            target.y = g::platform.y() + 0.001 * error_int + 0.1 * plat_error;
+            target.y = g::platform.y() + 0.01 * error_int + 0.13 * plat_error;
 
 
             move(move_alpha,target,state);
@@ -146,10 +147,6 @@ void AutoThread::run(){
 
 
         output << ";\n";
-
-        qDebug() << (float)timer.elapsed();
-        timer.restart();
-
 
         previous = next;
         previous_platform = next_platform;
@@ -262,10 +259,10 @@ void AutoThread::move(double alpha, position target, position robot_state){
     double positionError[3] = {target.x - robot_state.x ,target.y - robot_state.y , target.z - robot_state.z};
     double incrementVect[3];
 
-    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2)); //+ pow(positionError[2],2));
+    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2) + pow(positionError[2],2));
 
     //Publish
-    if(true){//fabs(dist) <= alpha){
+    if(fabs(dist) <= alpha){
         comm.setX( target.x);
         comm.setY( target.y);
         comm.setZ( target.z);
@@ -285,7 +282,7 @@ void AutoThread::move(double alpha, position target, position robot_state){
 
         comm.setX(robot_state.x + incrementVect[0]);
         comm.setY(robot_state.y + incrementVect[1]);
-        comm.setZ(robot_state.z + incrementVect[2]);
+        comm.setZ(target.z); //robot_state.z + incrementVect[2]);
 
     }
 

@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
 
 
-    qDebug() << "main from: " << QThread::currentThreadId();
+    qDebug() << "MAIN FROM: " << QThread::currentThreadId();
 
 
 
