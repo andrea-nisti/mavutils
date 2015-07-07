@@ -13,6 +13,9 @@
 
 int land_count = 0;int rot_count = 0;int circle_count = 0; int descent_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
+float plat_error = 0;
+float error_int = 0;
+
 std::ofstream output;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
@@ -87,7 +90,7 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
-            target.y = nodeList[actualNode].p.y;
+            target.y = g::platform.y();
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 
@@ -96,11 +99,17 @@ void AutoThread::run(){
             state.y = g::state.y();
             state.z = g::state.z();
 
+
             e_x = g::setPoint.x() - g::state.x();
             e_y = g::setPoint.y() - g::state.y();
             e_z = g::setPoint.z() - g::state.z();
 
             state.yaw = g::state.getYaw();
+
+            plat_error = target.y - state.y;
+            error_int += plat_error;
+            target.y = g::platform.y() + 0.001 * error_int + 0.1 * plat_error;
+
 
             move(move_alpha,target,state);
         }
@@ -201,15 +210,11 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
          //Centering task
 
-                //Calculate error
-
-                //Calculate corrected setpoint
 
             sP.x = error.x * land_gain + p.x;
             sP.y = error.y * land_gain + p.y;
 
             //wait to recenter
-
 
             if(fabs(error.x) < 0.08 && fabs(error.y) < 0.08){ z = g::state.z() + 0.3; descend_valid = true;}
 
