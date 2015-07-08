@@ -109,7 +109,7 @@ void AutoThread::run(){
 
             plat_error = target.y - state.y;
             error_int += plat_error;
-            target.y = g::platform.y() + 0.01 * error_int + 0.13 * plat_error;
+            target.y = g::platform.y() + 0.009 * error_int + 0.13 * plat_error;
 
 
             move(move_alpha,target,state);
