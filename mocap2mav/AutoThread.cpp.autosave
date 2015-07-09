@@ -76,7 +76,7 @@ void AutoThread::run(){
             state.y = g::state.y();
             state.z = g::state.z();
             position p;
-
+            
             p.x = nodeList[actualNode].p.x;
             p.y = nodeList[actualNode].p.y;
 
