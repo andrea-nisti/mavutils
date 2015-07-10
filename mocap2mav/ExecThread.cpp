@@ -264,6 +264,7 @@ void signalsReset(){
     executioner::land::landed = false;
     executioner::land::land_sig = false;
     executioner::land::was_executing = false;
+    executioner::land::land_plat_sig = false;
 
     executioner::take_off::take_off_sig = false;
     executioner::take_off::take_off_done = false;
