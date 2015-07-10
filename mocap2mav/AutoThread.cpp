@@ -143,15 +143,14 @@ void AutoThread::run(){
             state.x = g::state.x();
             state.y = g::state.y();
             state.z = g::state.z();
-            position target;
 
+            position target;
             target.x = nodeList[actualNode].p.x;
             target.y = g::platform.y();
 
             plat_error = target.y - state.y;
             error_int += plat_error;
             target.y = g::platform.y() + 0.009 * error_int + 0.13 * plat_error;
-
 
             float vel = nodeList[actualNode].a.params[0];
             land(vel,(float)1/r_auto,vz,target,state);
@@ -185,7 +184,8 @@ void AutoThread::run(){
 
             " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
             vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
-            roll<<" "<<pitch << " " << yaw ;                     //Attitude
+            roll<<" "<<pitch << " " << yaw                       //Attitude
+            <<" "<<plat_error;                                   //platform allignement error
 
         output << ";\n";
 
@@ -349,7 +349,7 @@ void AutoThread::move2(double alpha, position target, position robot_state,float
 
     else if(fabs(dist) > alpha){
 
-        //XXX Change alpha according to y/xs
+
 
         //Normalize
         positionError[0] = positionError[0] / dist;
