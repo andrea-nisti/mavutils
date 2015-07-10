@@ -28,6 +28,7 @@ extern int actualNode;
 namespace executioner{
     namespace land{
        extern bool land_sig;
+       extern bool land_plat_sig;
        extern bool landed;
        extern bool was_executing;
 

@@ -10,6 +10,7 @@ namespace executioner{
        bool land_sig;
        bool landed;
        bool was_executing;
+       bool land_plat_sig;
 
     }
     namespace take_off{

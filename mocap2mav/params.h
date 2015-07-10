@@ -12,7 +12,7 @@ int land_wait = 2; // Seconds
 int rot_wait = 3;
 float move_alpha = 1.5;
 
-float land_gain = 0.5;
+float land_gain = 0.0;
 
 
 
