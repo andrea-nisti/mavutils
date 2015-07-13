@@ -18,6 +18,7 @@ public:
     void move2(double alpha, position target, position robot_state, float dt);
     void rotate();
     void circle(double omega,double rad,double c[2],float dt,int secs);
+    void land_plat(MavState platform, MavState robot_state,float alpha = 1);
 signals:
     void publish();
 

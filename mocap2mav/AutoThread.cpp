@@ -19,6 +19,9 @@ int land_count = 0;int rot_count = 0;int circle_count = 0; int descent_count = 0
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
 float plat_error = 0;
 float error_int = 0;
+float error_int_x = 0;
+float error_int_y = 0;
+
 
 std::ofstream output;
 AutoThread::AutoThread(QObject *parent) :
@@ -275,6 +278,48 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
 }
 
+void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha = 1){
+
+    MavState comm = g::setPoint;
+
+    double position_error[2] = {platform.x() - robot_state.x(),platform.y() - robot_state.y() };
+
+    float x_sp = platform.x() + 0.1 * position_error[0] + 0.01 * error_int_x;
+    float y_sp = platform.y() + 0.1 * position_error[1] + 0.01 * error_int_y;
+
+    if(executioner::land::reset_int){error_int_x = 0; error_int_y = 0; executioner::land::reset_int = false;}
+    else{error_int_x += position_error[0]; error_int_y += position_error[1];}
+
+    double dist = sqrt(pow(x_sp - robot_state.x(),2) + pow(y_sp - robot_state.y(),2));
+
+    if (dist <= alpha){
+
+        comm.setX(x_sp);
+        //comm.setY(y_sp);
+
+    }
+    else{
+
+        float sp_error[2];
+
+        sp_error[0] = (x_sp - robot_state.x())/dist;
+        sp_error[1] = (y_sp - robot_state.y())/dist;
+
+        x_sp = robot_state.x() + sp_error[0] * alpha;
+        y_sp = robot_state.y() + sp_error[1] * alpha;
+
+        comm.setX(x_sp);
+        //comm.setY(y_sp);
+
+        executioner::land::reset_int = true;
+
+    }
+
+    g::setPoint = comm;
+
+
+}
+
 void AutoThread::takeOff(){
 
     MavState comm = g::setPoint;
@@ -316,7 +361,7 @@ void AutoThread::move(double alpha, position target, position robot_state){
         positionError[2] = positionError[2] / dist;
 
         //Calculate relative motion to actual position
-        incrementVect[0] = positionError[0] * alpha ;
+        incrementVect[0] = positionError[0] * alpha;
         incrementVect[1] = positionError[1] * alpha;
         incrementVect[2] = positionError[2] * alpha;
 

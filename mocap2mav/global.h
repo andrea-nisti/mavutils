@@ -31,6 +31,7 @@ namespace executioner{
        extern bool land_plat_sig;
        extern bool landed;
        extern bool was_executing;
+       extern bool reset_int;
 
 
     }
