@@ -17,7 +17,7 @@
 
 int land_count = 0;int rot_count = 0;int circle_count = 0; int descent_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
-float plat_error = 0;
+float plat_error[2] = {0,0};
 float error_int = 0;
 float error_int_x = 0;
 float error_int_y = 0;
@@ -84,6 +84,10 @@ void AutoThread::run(){
         next = g::state;
         next_platform = g::platform;
 
+        e_x = g::setPoint.x() - g::state.x();
+        e_y = g::setPoint.y() - g::state.y();
+        e_z = g::setPoint.z() - g::state.z();
+
         vz = r_auto * (next.z() - previous.z()) ;
         vx = r_auto * (next.x() - previous.x()) ;
         vy = r_auto * (next.y() - previous.y()) ;
@@ -116,7 +120,7 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
-            target.y = g::platform.y();
+            target.y = nodeList[actualNode].p.y;
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 
@@ -125,38 +129,14 @@ void AutoThread::run(){
             state.y = g::state.y();
             state.z = g::state.z();
 
-            e_x = g::setPoint.x() - g::state.x();
-            e_y = g::setPoint.y() - g::state.y();
-            e_z = g::setPoint.z() - g::state.z();
-
-            state.yaw = g::state.getYaw();
-
-            plat_error = target.y - state.y;
-            error_int += plat_error;
-            target.y = g::platform.y() + 0.009 * error_int + 0.13 * plat_error;
-
-
             move(move_alpha,target,state);
         }
 
         //Land on moving platform (experimental)
         if(executioner::land::land_plat_sig){
 
-            position state;
-            state.x = g::state.x();
-            state.y = g::state.y();
-            state.z = g::state.z();
+            land_plat(g::platform,g::state,(float)1.8);
 
-            position target;
-            target.x = nodeList[actualNode].p.x;
-            target.y = g::platform.y();
-
-            plat_error = target.y - state.y;
-            error_int += plat_error;
-            target.y = g::platform.y() + 0.009 * error_int + 0.13 * plat_error;
-
-            float vel = nodeList[actualNode].a.params[0];
-            land(vel,(float)1/r_auto,vz,target,state);
         }
 
         //rotate
@@ -188,7 +168,7 @@ void AutoThread::run(){
             " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
             vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
             roll<<" "<<pitch << " " << yaw                       //Attitude
-            <<" "<<plat_error;                                   //platform allignement error
+            <<" "<<plat_error[0]<<" "<<plat_error[1];            //platform allignement error
 
         output << ";\n";
 
@@ -278,14 +258,14 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
 }
 
-void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha = 1){
+void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha){
 
     MavState comm = g::setPoint;
 
     double position_error[2] = {platform.x() - robot_state.x(),platform.y() - robot_state.y() };
 
-    float x_sp = platform.x() + 0.1 * position_error[0] + 0.01 * error_int_x;
-    float y_sp = platform.y() + 0.1 * position_error[1] + 0.01 * error_int_y;
+    float x_sp = platform.x() + kp * position_error[0] + ki * error_int_x;
+    float y_sp = platform.y() + kp * position_error[1] + ki* error_int_y;
 
     if(executioner::land::reset_int){error_int_x = 0; error_int_y = 0; executioner::land::reset_int = false;}
     else{error_int_x += position_error[0]; error_int_y += position_error[1];}
@@ -294,8 +274,8 @@ void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha = 
 
     if (dist <= alpha){
 
-        comm.setX(x_sp);
-        //comm.setY(y_sp);
+        //comm.setX(x_sp);
+        comm.setY(y_sp);
 
     }
     else{
@@ -308,10 +288,10 @@ void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha = 
         x_sp = robot_state.x() + sp_error[0] * alpha;
         y_sp = robot_state.y() + sp_error[1] * alpha;
 
-        comm.setX(x_sp);
-        //comm.setY(y_sp);
+        //comm.setX(x_sp);
+        comm.setY(y_sp);
 
-        executioner::land::reset_int = true;
+        //executioner::land::reset_int = true;
 
     }
 

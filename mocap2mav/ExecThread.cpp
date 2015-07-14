@@ -55,9 +55,8 @@ ExecThread::ExecThread(QObject *parent) :
     node1.a.params[0] = -1; //height
     nodeList.push_back(node1);
 
-
-
     node rotate;
+    rotate.p.x = 1;
     rotate.a.type = 'r';
     rotate.a.params[0] = 1;
     rotate.p.yaw = 0;
@@ -141,7 +140,7 @@ void ExecThread::run(){
                 executioner::land::was_executing = true;
             }
 
-            executioner::land::land_sig = true;
+            executioner::land::land_plat_sig = true;
             break;
 
         //TAKEOFF
@@ -208,7 +207,7 @@ bool checkActions(char a){
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
            fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
 
-           if(++move_count == 4 * 120);  //{move_count = 0; executioner::move::move_done = true;}
+           if(++move_count == 4 * 120){move_count = 0; executioner::move::move_done = true;}
 
         }
         else{
