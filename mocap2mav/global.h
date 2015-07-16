@@ -53,11 +53,14 @@ namespace executioner{
       extern int rotate_id;
     }
 
-    namespace circle{
-      extern bool circle_sig;
-      extern bool circle_done;
+    namespace trajectory{
+      extern bool traj_sig;
+      extern bool traj_done;
       extern bool was_executing;
+      extern double traj_time;
     }
+
+
 
 
 

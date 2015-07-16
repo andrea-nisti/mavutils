@@ -29,10 +29,11 @@ namespace executioner{
        bool rotate_done;
        int rotate_id;
     }
-    namespace circle{
-       bool circle_sig;
-       bool circle_done;
+    namespace trajectory{
+       bool traj_sig;
+       bool traj_done;
        bool was_executing;
+       double traj_time;
     }
 
 }
@@ -190,14 +191,14 @@ void ExecThread::run(){
 
         case 'c':
 
-            if(!executioner::circle::was_executing){
+            if(!executioner::trajectory::was_executing){
 
                 nodeList[actualNode].p.x = g::setPoint.x();
                 nodeList[actualNode].p.y = g::setPoint.y();
-                executioner::circle::was_executing = true;
+                executioner::trajectory::was_executing = true;
 
             }
-            executioner::circle::circle_sig = true;
+            executioner::trajectory::was_executing = true;
             break;
         default:
             break;
@@ -271,7 +272,7 @@ bool checkActions(char a){
         break;
      case 'c':
 
-        return executioner::circle::circle_done;
+        return executioner::trajectory::traj_done;
 
         break;
 
@@ -301,9 +302,10 @@ void signalsReset(){
     executioner::rotate::rotate_done = false;
     executioner::rotate::rotate_sig = false;
 
-    executioner::circle::circle_done = false;
-    executioner::circle::circle_sig = false;
-    executioner::circle::was_executing = false;
+    executioner::trajectory::traj_done = false;
+    executioner::trajectory::traj_sig = false;
+    executioner::trajectory::was_executing = false;
+    executioner::trajectory::traj_time = 0;
 
 }
 

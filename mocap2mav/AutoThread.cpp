@@ -21,6 +21,7 @@ float plat_error[2] = {0,0};
 float error_int = 0;
 float error_int_x = 0;
 float error_int_y = 0;
+float t_traj = 0;
 
 
 std::ofstream output;
@@ -60,7 +61,7 @@ AutoThread::~AutoThread()
 void AutoThread::run(){
 
     QTime rate;
-    QTime timer;
+
 
     qDebug() << "automatic from: " << QThread::currentThreadId();
     MavState previous = g::state;
@@ -76,7 +77,7 @@ void AutoThread::run(){
     double e_y = 0;
     double e_z = 0;
     float vy_platform = 0;
-    timer.start();
+
     rate.start();
 
     while (true) {
@@ -147,17 +148,29 @@ void AutoThread::run(){
             rotate();
         }
 
-        //Circle
-        if(executioner::circle::circle_sig){
+        //Trajectory
+        if(true){//executioner::trajectory::traj_sig){
 
-            double omega = nodeList[actualNode].a.params[0];
-            double radius = nodeList[actualNode].a.params[1];
-            double secs = nodeList[actualNode].a.params[2];
-            double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
-            circle(omega,radius,c,(float)1/r_auto,secs);
+            if(!executioner::trajectory::was_executing){
+
+                t_traj = 0;
+                executioner::trajectory::was_executing = true;
+
+            }
+            else{
+                t_traj += (float)1/r_auto;
+                double omega = nodeList[actualNode].a.params[0];
+                double radius = nodeList[actualNode].a.params[1];
+                double secs = nodeList[actualNode].a.params[2];
+                double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
+
+                trajectory(omega,radius,c,t_traj,secs);
+
+
+            }
+            qDebug() << "SP: " << g::setPoint.x() << " " << g::setPoint.y() << "timer: " << t_traj;
         }
 
-        //Logging
 
         //Writing output file
 
@@ -442,14 +455,15 @@ void AutoThread::rotate(){
 
 }
 
-void AutoThread::circle(double omega,double rad,double c[2],float dt,int secs){
+void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs){
 
     MavState comm = g::setPoint;
 
       // Circular trajectory
 
-    double x_sp = c[0] + rad*cos(omega * dt);
-    double y_sp = c[1] + rad*sin(omega * dt);
+
+    double x_sp = c[0] + rad*cos(omega * t);
+    double y_sp = c[1] + rad*sin(omega * t);
     double yawSP = atan2(c[0] - g::state.y(),c[1] - g::state.x());
     double yawComm;
     calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
@@ -461,7 +475,7 @@ void AutoThread::circle(double omega,double rad,double c[2],float dt,int secs){
 
     g::setPoint = comm;
 
-    if(++circle_count >= secs * r_auto){ executioner::circle::circle_done = true; circle_count = 0;}
+    if(++circle_count >= secs * r_auto){ executioner::trajectory::traj_done = true; circle_count = 0;}
 
 }
 
@@ -473,45 +487,7 @@ void AutoThread::startMe(){
 
 
 
-void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
-
-    double yawSp_h = yawSP - robotHeading;
-
-    if(yawSp_h > PI ) yawSp_h = yawSp_h - 2*PI;
-    else if (yawSp_h < -PI) yawSp_h= yawSp_h + 2*PI;
-
-    if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
-    else if(fabs(yawSp_h) > PI - PI/18){
-        //Increase yaw
-        rot_count = 0;
-        yawComm = robotHeading + PI / 18 ;
-        if (yawComm > PI){
-            yawComm = yawComm - 2*PI;
-        }
-    }
-    else{
-
-
-        if (yawSp_h > 0){
-            //Increase yaw
-            yawComm = robotHeading + PI / 18 ;
-            if (yawComm > PI){
-               yawComm = yawComm - 2*PI;
-            }
-
-        }
-        else{
-            //decrease yaw
-            yawComm = robotHeading - PI / 18 ;
-            if (yawComm < -PI){
-              yawComm = -yawComm + 2*PI;
-            }
-        }
-
-    }
-
-}
 
 
 

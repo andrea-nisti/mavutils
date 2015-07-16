@@ -5,6 +5,8 @@
 #include <QTime>
 #include <cmath>
 #include "global.h"
+#include "utils.h"
+
 #define PI 3.141592653589
 
 ManualThread::ManualThread(QObject *parent) :
@@ -47,13 +49,12 @@ void ManualThread::run(){
 
         float factor = cos_ / (pow(sin_, 2) + 1);
 
+
+
         x_sp = 0.4 + a * factor;
         y_sp = a * sin_ * factor;
 
 
-        //yaw = atan2(-g::state.y(),-g::state.x());
-
-        //g::setPoint.setYaw(yaw);
 
         g::setPoint.setPosition(x_sp, y_sp , -1);
 
@@ -86,4 +87,52 @@ void ManualThread::stopMe(){
     this->quit();
 
 }
+
+
+
+
+
+/*
+void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
+
+
+    double yawSp_h = yawSP - robotHeading;
+
+    if(yawSp_h > PI ) yawSp_h = yawSp_h - 2*PI;
+    else if (yawSp_h < -PI) yawSp_h= yawSp_h + 2*PI;
+
+    if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
+    else if(fabs(yawSp_h) > PI - PI/18){
+        //Increase yaw
+
+        yawComm = robotHeading + PI / 18 ;
+        if (yawComm > PI){
+            yawComm = yawComm - 2*PI;
+        }
+    }
+    else{
+
+
+        if (yawSp_h > 0){
+            //Increase yaw
+            yawComm = robotHeading + PI / 18 ;
+            if (yawComm > PI){
+               yawComm = yawComm - 2*PI;
+            }
+
+        }
+        else{
+            //decrease yaw
+            yawComm = robotHeading - PI / 18 ;
+            if (yawComm < -PI){
+              yawComm = -yawComm + 2*PI;
+            }
+        }
+
+    }
+
+}
+*/
+
+
 
