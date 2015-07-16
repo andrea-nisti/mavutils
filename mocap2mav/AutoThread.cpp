@@ -124,18 +124,20 @@ void AutoThread::run(){
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 
+            float alpha = nodeList[actualNode].a.params[0];
+
             position state;
             state.x = g::state.x();
             state.y = g::state.y();
             state.z = g::state.z();
 
-            move(move_alpha,target,state);
+            move(alpha,target,state);
         }
 
         //Land on moving platform (experimental)
         if(executioner::land::land_plat_sig){
 
-            land_plat(g::platform,g::state,(float)1.8);
+            land_plat(g::platform,g::state,2);
 
         }
 
@@ -262,20 +264,21 @@ void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha){
 
     MavState comm = g::setPoint;
 
-    double position_error[2] = {platform.x() - robot_state.x(),platform.y() - robot_state.y() };
+    float position_error[2] = {platform.x() - robot_state.x(),platform.y() - robot_state.y() };
+
+    error_int_x += position_error[0];
+    error_int_y += position_error[1];
 
     float x_sp = platform.x() + kp * position_error[0] + ki * error_int_x;
     float y_sp = platform.y() + kp * position_error[1] + ki* error_int_y;
 
-    if(executioner::land::reset_int){error_int_x = 0; error_int_y = 0; executioner::land::reset_int = false;}
-    else{error_int_x += position_error[0]; error_int_y += position_error[1];}
-
     double dist = sqrt(pow(x_sp - robot_state.x(),2) + pow(y_sp - robot_state.y(),2));
 
-    if (dist <= alpha){
+    if (true){//dist <= alpha){
 
         //comm.setX(x_sp);
         comm.setY(y_sp);
+        comm.setX((float)0.5);
 
     }
     else{
@@ -288,14 +291,15 @@ void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha){
         x_sp = robot_state.x() + sp_error[0] * alpha;
         y_sp = robot_state.y() + sp_error[1] * alpha;
 
-        //comm.setX(x_sp);
+        comm.setX((float)0.5);
         comm.setY(y_sp);
 
         //executioner::land::reset_int = true;
 
     }
 
-    g::setPoint = comm;
+    autoCommand.push_back(comm);
+    publish();
 
 
 }

@@ -10,7 +10,7 @@ float robot_height = 0.08; // meters
 int land_wait = 2; // Seconds
 
 int rot_wait = 3;
-float move_alpha = 1.2;
+float move_alpha = 0.6;
 
 float land_gain = 0.3;
 
@@ -23,3 +23,4 @@ float ki = 0.009;
 
 
 #endif // PARAMS_H
+

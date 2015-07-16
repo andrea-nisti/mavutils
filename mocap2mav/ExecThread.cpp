@@ -64,9 +64,34 @@ ExecThread::ExecThread(QObject *parent) :
 
     node move;
     move.a.type = 'm';
-    move.p.x = 0.3;
+    move.p.x = 0.8;
     move.p.y = 0;
     move.p.z = -1;
+    move.a.params[0] = 0.6;
+    nodeList.push_back(move);
+
+    move.p.x = 0.8;
+    move.p.y = 0;
+    move.p.z = -1;
+    move.a.params[0] = 1;
+    nodeList.push_back(move);
+
+    move.p.x = 0.8;
+    move.p.y = -0.8;
+    move.p.z = -1;
+    move.a.params[0] = 0.3;
+    nodeList.push_back(move);
+
+    move.p.x = -0.5;
+    move.p.y = -0.5;
+    move.p.z = -1;
+    move.a.params[0] = 0.8;
+    nodeList.push_back(move);
+
+    move.p.x = 0;
+    move.p.y = 0;
+    move.p.z = -1.5;
+    move.a.params[0] = 0.4;
     nodeList.push_back(move);
 
 
@@ -140,7 +165,7 @@ void ExecThread::run(){
                 executioner::land::was_executing = true;
             }
 
-            executioner::land::land_plat_sig = true;
+            executioner::land::land_sig = true;
             break;
 
         //TAKEOFF
