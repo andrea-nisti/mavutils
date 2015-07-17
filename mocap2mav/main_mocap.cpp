@@ -8,7 +8,7 @@
 #include "global.h"
 #include "CommanderThread.h"
 #include <QThread>
-#include "MainControl.h"
+
 #include "Commander.h"
 #include "utils.h"
 #include "Automatic.h"
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
 
 
-    qDebug() << "main from: " << QThread::currentThreadId();
+    qDebug() << "MAIN FROM: " << QThread::currentThreadId();
 
 
 

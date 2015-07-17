@@ -4,50 +4,24 @@
 #include "global.h"
 #include "utils.h"
 #include <iostream>
-#include <ostream>
+#include<ostream>
 #include <fstream>
 #include "params.h"
-#include <sstream>
+
 #include <cmath>
-#include <QString>
-#include <QDate>
-#include <sys/stat.h>
-#include <string>
 #define PI 3.141592653589
 
 int land_count = 0;int rot_count = 0;int circle_count = 0; int descent_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
-float plat_error[2] = {0,0};
+float plat_error = 0;
 float error_int = 0;
-float error_int_x = 0;
-float error_int_y = 0;
-float t_traj = 0;
-
 
 std::ofstream output;
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
+    output.open("output.txt");
 
-    // Log Values
-    QString s_file,s_folder;
-
-    std::string str;
-
-    s_file = QTime::currentTime().toString("hh_mm");
-    s_file.push_back(".txt");
-    s_folder = QDate::currentDate().toString();
-    str = s_folder.toStdString();
-    struct stat sb;
-
-    if (!(stat(str.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)))
-    {
-         mkdir(str.c_str(),0777);
-    }
-
-    str = str + "/" + s_file.toStdString();
-
-    output.open(str);
 
 }
 
@@ -61,6 +35,7 @@ AutoThread::~AutoThread()
 void AutoThread::run(){
 
     QTime rate;
+    QTime timer;
 
     qDebug() << "automatic from: " << QThread::currentThreadId();
     MavState previous = g::state;
@@ -76,24 +51,18 @@ void AutoThread::run(){
     double e_y = 0;
     double e_z = 0;
     float vy_platform = 0;
-
+    timer.start();
     rate.start();
-
     while (true) {
 
         next = g::state;
         next_platform = g::platform;
 
-        e_x = g::setPoint.x() - g::state.x();
-        e_y = g::setPoint.y() - g::state.y();
-        e_z = g::setPoint.z() - g::state.z();
 
         vz = r_auto * (next.z() - previous.z()) ;
         vx = r_auto * (next.x() - previous.x()) ;
         vy = r_auto * (next.y() - previous.y()) ;
         vy_platform = r_auto * (next_platform.y() - previous_platform.y()) ;
-
-
         //takeoff
         if(executioner::take_off::take_off_sig){
                 takeOff();
@@ -107,9 +76,10 @@ void AutoThread::run(){
             state.y = g::state.y();
             state.z = g::state.z();
             position p;
-
+            
             p.x = nodeList[actualNode].p.x;
             p.y = nodeList[actualNode].p.y;
+
 
             float vel = nodeList[actualNode].a.params[0];
             land(vel,(float)1/r_auto,vz,p,state);
@@ -121,26 +91,47 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
-            target.y = nodeList[actualNode].p.y;
+            target.y = g::platform.y();
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
-
-            float alpha = nodeList[actualNode].a.params[0];
 
             position state;
             state.x = g::state.x();
             state.y = g::state.y();
             state.z = g::state.z();
 
-            move(alpha,target,state);
+
+            e_x = g::setPoint.x() - g::state.x();
+            e_y = g::setPoint.y() - g::state.y();
+            e_z = g::setPoint.z() - g::state.z();
+
+            state.yaw = g::state.getYaw();
+
+            plat_error = target.y - state.y;
+            error_int += plat_error;
+            target.y = g::platform.y() + 0.009 * error_int + 0.13 * plat_error;
+
+
+            move(move_alpha,target,state);
         }
 
         //Land on moving platform (experimental)
         if(executioner::land::land_plat_sig){
 
-            land_plat(g::platform,g::state,2);
+            position state;
+            state.x = g::state.x();
+            state.y = g::state.y();
+            state.z = g::state.z();
+            position p;
 
+            p.x = nodeList[actualNode].p.x;
+            p.y = nodeList[actualNode].p.y;
+
+
+            float vel = nodeList[actualNode].a.params[0];
+            land(vel,(float)1/r_auto,vz,p,state);
         }
+
 
         //rotate
         if(executioner::rotate::rotate_sig){
@@ -148,44 +139,31 @@ void AutoThread::run(){
             rotate();
         }
 
-        //Trajectory
-        if(executioner::trajectory::traj_sig){
+        //Circle
+        if(executioner::circle::circle_sig){
 
-            if(!executioner::trajectory::was_executing){
-
-                t_traj = 0;
-                executioner::trajectory::was_executing = true;
-
-            }
-            else{
-                t_traj += (float)1/r_auto;
-                double omega = nodeList[actualNode].a.params[0];
-                double radius = nodeList[actualNode].a.params[1];
-                double secs = nodeList[actualNode].a.params[2];
-                double look = nodeList[actualNode].a.params[3];
-                double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
-
-
-                trajectory(omega,radius,c,t_traj,secs,look);
-
-
-            }
-
+            double omega = nodeList[actualNode].a.params[0];
+            double radius = nodeList[actualNode].a.params[1];
+            double secs = nodeList[actualNode].a.params[2];
+            double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
+            circle(omega,radius,c,(float)1/r_auto,secs);
         }
 
+        //Logging
 
         //Writing output file
 
         float roll,pitch,yaw;
         g::state.orientation2(&roll,&pitch,&yaw);
 
+
         output <<g::state.x()<<" "<<g::state.y()<<" "<<g::state.z()<< //Position
             " "<<g::setPoint.x()<<" "<<g::setPoint.y()<<" "<<g::setPoint.z()<< //Position SetPoint
 
-            " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
-            vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
-            roll<<" "<<pitch << " " << yaw                       //Attitude
-            <<" "<<plat_error[0]<<" "<<plat_error[1];            //platform allignement error
+                 " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
+                 vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
+                roll<<" "<<pitch << " " << yaw ;                     //Attitude
+
 
         output << ";\n";
 
@@ -275,50 +253,6 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
 }
 
-void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha){
-
-    MavState comm = g::setPoint;
-
-    float position_error[2] = {platform.x() - robot_state.x(),platform.y() - robot_state.y() };
-
-    error_int_x += position_error[0];
-    error_int_y += position_error[1];
-
-    float x_sp = platform.x() + kp * position_error[0] + ki * error_int_x;
-    float y_sp = platform.y() + kp * position_error[1] + ki* error_int_y;
-
-    double dist = sqrt(pow(x_sp - robot_state.x(),2) + pow(y_sp - robot_state.y(),2));
-
-    if (true){//dist <= alpha){
-
-        //comm.setX(x_sp);
-        comm.setY(y_sp);
-        comm.setX((float)0.5);
-
-    }
-    else{
-
-        float sp_error[2];
-
-        sp_error[0] = (x_sp - robot_state.x())/dist;
-        sp_error[1] = (y_sp - robot_state.y())/dist;
-
-        x_sp = robot_state.x() + sp_error[0] * alpha;
-        y_sp = robot_state.y() + sp_error[1] * alpha;
-
-        comm.setX((float)0.5);
-        comm.setY(y_sp);
-
-        //executioner::land::reset_int = true;
-
-    }
-
-    autoCommand.push_back(comm);
-    publish();
-
-
-}
-
 void AutoThread::takeOff(){
 
     MavState comm = g::setPoint;
@@ -334,6 +268,7 @@ void AutoThread::takeOff(){
     publish();
 
 }
+
 
 void AutoThread::move(double alpha, position target, position robot_state){
 
@@ -360,7 +295,7 @@ void AutoThread::move(double alpha, position target, position robot_state){
         positionError[2] = positionError[2] / dist;
 
         //Calculate relative motion to actual position
-        incrementVect[0] = positionError[0] * alpha;
+        incrementVect[0] = positionError[0] * alpha ;
         incrementVect[1] = positionError[1] * alpha;
         incrementVect[2] = positionError[2] * alpha;
 
@@ -370,9 +305,55 @@ void AutoThread::move(double alpha, position target, position robot_state){
 
     }
 
+
     g::setPoint = comm;
 
 }
+
+void AutoThread::move2(double alpha, position target, position robot_state,float dt){
+
+    MavState comm = g::setPoint;
+
+    //Calculate error vector
+    double positionError[3] = {target.x - comm.x() ,target.y - comm.y() , target.z - comm.z()};
+    double incrementVect[3];
+
+    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2) + pow(positionError[2],2));
+
+    //Publish
+    if(fabs(dist) <= alpha){
+        comm.setX( target.x);
+        comm.setY( target.y);
+        comm.setZ( target.z);
+    }
+
+    else if(fabs(dist) > alpha){
+
+        //XXX Change alpha according to y/xs
+
+        //Normalize
+        positionError[0] = positionError[0] / dist;
+        positionError[1] = positionError[1] / dist;
+        positionError[2] = positionError[2] / dist;
+
+        //Calculate relative motion to actual position
+        incrementVect[0] = positionError[0] * alpha * dt;
+        incrementVect[1] = positionError[1] * alpha * dt;
+        incrementVect[2] = positionError[2] * alpha * dt;
+
+        //comm.x += incrementVect[0] ?
+
+        comm.setX(comm.x() + incrementVect[0]);
+        comm.setY(comm.y() + incrementVect[1]);
+        comm.setZ(comm.z() + incrementVect[2]);
+
+    }
+
+    autoCommand.push_back(comm);
+    publish();
+
+}
+
 
 void AutoThread::rotate(){
 
@@ -412,37 +393,26 @@ void AutoThread::rotate(){
 
 }
 
-void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs,float look){
+void AutoThread::circle(double omega,double rad,double c[2],float dt,int secs){
 
     MavState comm = g::setPoint;
 
-    // Circular trajectory
+      // Circular trajectory
 
-    double x_sp = c[0] + rad*cos(omega * t);
-    double y_sp = c[1] + rad*sin(omega * t);
-
-    if (look == 1){
-        double yawSP = atan2(c[1] - g::state.y(),c[0] - g::state.x());
-        double yawComm;
-        calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
-        comm.setYaw(yawComm);
-    }
-    else if(look == 2){
-
-        double yawSP = atan2(nodeList[actualNode].p.y - g::state.y(), nodeList[actualNode].p.x - g::state.x());
-        double yawComm;
-        calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
-        comm.setYaw(yawComm);
-
-    }
-
+    double x_sp = c[0] + rad*cos(omega * dt);
+    double y_sp = c[1] + rad*sin(omega * dt);
+    double yawSP = atan2(c[0] - g::state.y(),c[1] - g::state.x());
+    double yawComm;
+    calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
 
     comm.setX(x_sp);
     comm.setY(y_sp);
+    comm.setYaw(yawComm);
+
 
     g::setPoint = comm;
 
-    if(++circle_count >= secs * r_auto){ executioner::trajectory::traj_done = true; circle_count = 0;}
+    if(++circle_count >= secs * r_auto){ executioner::circle::circle_done = true; circle_count = 0;}
 
 }
 
@@ -450,7 +420,11 @@ void AutoThread::startMe(){
     this->start();
 }
 
-inline void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
+
+
+
+
+void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
 
     double yawSp_h = yawSP - robotHeading;
@@ -461,12 +435,11 @@ inline void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
     if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
     else if(fabs(yawSp_h) > PI - PI/18){
         //Increase yaw
-
+        rot_count = 0;
         yawComm = robotHeading + PI / 18 ;
         if (yawComm > PI){
             yawComm = yawComm - 2*PI;
         }
-
     }
     else{
 
@@ -478,21 +451,21 @@ inline void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
                yawComm = yawComm - 2*PI;
             }
 
-
         }
         else{
             //decrease yaw
             yawComm = robotHeading - PI / 18 ;
-             qDebug() << yawComm;
             if (yawComm < -PI){
-              yawComm = yawComm + 2*PI;
-
+              yawComm = -yawComm + 2*PI;
             }
         }
 
-
     }
-    qDebug() << "heading: " << robotHeading <<"Yaw SP: " << yawSP << "Yaw SP_h: " <<yawSp_h << "yawcomm " << yawComm;
+
+}
+
+
+void log(float a,float b){
 
 }
 

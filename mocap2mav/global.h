@@ -20,12 +20,18 @@ namespace g {
 
 extern std::vector <MavState> manualCommand;
 extern std::vector <MavState> autoCommand;
+extern std::vector<node> nodeList;
+extern int actualNode;
+
+
 
 namespace executioner{
     namespace land{
        extern bool land_sig;
+       extern bool land_plat_sig;
        extern bool landed;
        extern bool was_executing;
+       extern bool reset_int;
 
 
     }
@@ -47,18 +53,20 @@ namespace executioner{
       extern int rotate_id;
     }
 
-    namespace circle{
-      extern bool circle_sig;
-      extern bool circle_done;
+    namespace trajectory{
+      extern bool traj_sig;
+      extern bool traj_done;
       extern bool was_executing;
+      extern double traj_time;
     }
+
+
 
 
 
 }
 
-extern std::vector<node> nodeList;
-extern int actualNode;
+
 
 
 

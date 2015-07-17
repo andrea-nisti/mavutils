@@ -10,6 +10,8 @@ namespace executioner{
        bool land_sig;
        bool landed;
        bool was_executing;
+       bool land_plat_sig;
+       bool reset_int;
 
     }
     namespace take_off{
@@ -27,16 +29,18 @@ namespace executioner{
        bool rotate_done;
        int rotate_id;
     }
-    namespace circle{
-       bool circle_sig;
-       bool circle_done;
+    namespace trajectory{
+       bool traj_sig;
+       bool traj_done;
        bool was_executing;
+       double traj_time;
     }
 
 }
 
 std::vector<node> nodeList;
 int actualNode = 0;
+int r_exec = 120; //Hz
 
 
 bool checkActions(char a);
@@ -49,55 +53,47 @@ ExecThread::ExecThread(QObject *parent) :
 
     node node1;
     node1.a.type = 't';
-    node1.a.params[0] = -1.5; //height
+    node1.a.params[0] = -1; //height
     nodeList.push_back(node1);
 
     node move;
+    move.a.type = 'm';
+    move.p.x = 0.;
+    move.p.y = 0;
+    move.p.z = -1;
+    move.a.params[0] = 0.6;
+    nodeList.push_back(move);
 
     node rotate;
-    rotate.a.type = 'r';
-    rotate.a.params[0] = 1; //angle_valid
-    rotate.p.x = 1.03;
+    rotate.p.x = 1;
     rotate.p.y = 1;
-    rotate.p.yaw = PI;
+    rotate.a.type = 'r';
+    rotate.a.params[0] = 1;
+    rotate.p.yaw = PI/4;
     nodeList.push_back(rotate);
 
-    move.a.type = 'm';
-    move.p.x = 0;
-    move.p.y = 0;
-    move.p.z =-0.8;
-    //nodeList.push_back(move);
+    rotate.p.x = -1;
+    rotate.p.y = 0;
+    rotate.a.type = 'r';
+    rotate.a.params[0] = 0;
+    rotate.p.yaw = PI/4;
+    nodeList.push_back(rotate);
+
+    node circle;
+    circle.p.x = 0;
+    circle.p.y = 0;
+    circle.a.type = 'c';
+    circle.a.params[0] = 0.6; //Omega
+    circle.a.params[1] = 0.5; //Rad
+    circle.a.params[2] = 10;  //Secs
+    circle.a.params[3] = 1;   //look
+    nodeList.push_back(circle);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 0.4; //height velocity
-    land.a.params[1] =  0.0; // offset
+    land.a.params[0] = 2; //height velocity
+    land.a.params[1] = 0; // offset
     nodeList.push_back(land);
-
-    /*
-    nodeList.push_back(node1);
-    rotate.p.x = 0;
-    rotate.p.y = 0;
-    nodeList.push_back(rotate);
-
-    move.p.x = 0.5;
-    move.p.y = -0.5;
-    move.p.z = -1;
-    nodeList.push_back(move);
-
-    rotate.a.params[0] = 1;
-    rotate.p.yaw = 0;
-    nodeList.push_back(rotate);
-    move.p.x = 1.018;
-    move.p.y = 1.072;
-    move.p.z =-1.5;
-    nodeList.push_back(move);
-    nodeList.push_back(land);
-*/
-
-
-
-
 
     if(nodeList.size()>0){
 
@@ -124,8 +120,6 @@ void ExecThread::run(){
      */
 
     QTime rate;
-    int r_exec = 120; //Hz
-
 
     qDebug() << "executioner from: " << QThread::currentThreadId();
 
@@ -190,14 +184,17 @@ void ExecThread::run(){
 
         case 'c':
 
-            if(!executioner::circle::was_executing){
+            if(!executioner::trajectory::was_executing){
 
-                //nodeList[actualNode].p.x = g::setPoint.x();
-                //nodeList[actualNode].p.y = g::setPoint.y();
-                executioner::circle::was_executing = true;
+
+                nodeList[actualNode].p.x = g::setPoint.x();
+                nodeList[actualNode].p.y = g::setPoint.y();
+                executioner::trajectory::was_executing = true;
+
 
             }
-            executioner::circle::circle_sig = true;
+            executioner::trajectory::traj_sig = true;
+
             break;
         default:
             break;
@@ -232,7 +229,7 @@ bool checkActions(char a){
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
            fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
 
-           if(++move_count == 3 * 120); //executioner::move::move_done = true;
+           if(++move_count == 4 * 120){move_count = 0; executioner::move::move_done = true;}
 
         }
         else{
@@ -271,7 +268,7 @@ bool checkActions(char a){
         break;
      case 'c':
 
-        return executioner::circle::circle_done;
+        return executioner::trajectory::traj_done;
 
         break;
 
@@ -289,6 +286,7 @@ void signalsReset(){
     executioner::land::landed = false;
     executioner::land::land_sig = false;
     executioner::land::was_executing = false;
+    executioner::land::land_plat_sig = false;
 
     executioner::take_off::take_off_sig = false;
     executioner::take_off::take_off_done = false;
@@ -300,9 +298,10 @@ void signalsReset(){
     executioner::rotate::rotate_done = false;
     executioner::rotate::rotate_sig = false;
 
-    executioner::circle::circle_done = false;
-    executioner::circle::circle_sig = false;
-    executioner::circle::was_executing = false;
+    executioner::trajectory::traj_done = false;
+    executioner::trajectory::traj_sig = false;
+    executioner::trajectory::was_executing = false;
+    executioner::trajectory::traj_time = 0;
 
 }
 

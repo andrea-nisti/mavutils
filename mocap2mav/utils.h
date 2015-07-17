@@ -2,6 +2,8 @@
 #define UTILS_H
 
 #include<vector>
+#define PI 3.141592653589
+
 
 struct position{
 
@@ -70,7 +72,6 @@ struct node {
     action a;
 
 };
-
 
 
 

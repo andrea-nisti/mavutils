@@ -73,15 +73,15 @@ void PositionDispatcher::sendPosition()
 
         _sendMavlinkMessage(&msg1);
 
-        _dispatchTime.restart();
+
 
 //        qDebug() << "Sent now     :     " << g::state.x() << "\t"
 //                             <<  g::state.y() << "\t"
 //                             << g::state.z()<< "\t"
 //                             ;
 
-        float interp = 0;
-        //if (executioner::move::move_sig) interp = 2;
+
+
         mavlink_msg_vicon_position_estimate_pack(
                     1,
                     MAV_COMP_ID_ALL, &msg2,
@@ -89,11 +89,18 @@ void PositionDispatcher::sendPosition()
                     g::setPoint.x(),
                     g::setPoint.y(),
                     g::setPoint.z(),
-                    interp, //rad
-                    0, //rad
+
+                    5, //rate saturation
+                    0.5, //Rate gain
+
                     g::setPoint.yaw()); //rad
+
          _sendMavlinkMessage(&msg2);
          //qDebug() << "Sent position target";
+
+
+        _dispatchTime.restart();
+
 
     }
 
