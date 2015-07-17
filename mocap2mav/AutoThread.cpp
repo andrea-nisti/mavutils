@@ -133,7 +133,9 @@ void AutoThread::run(){
             state.y = g::state.y();
             state.z = g::state.z();
 
-            move(alpha,target,state);
+            MavState comm;
+            move(alpha,target,state,comm);
+            g::setPoint = comm;
         }
 
         //Land on moving platform (experimental)
@@ -152,20 +154,59 @@ void AutoThread::run(){
         //Trajectory
         if(executioner::trajectory::traj_sig){
 
+            double omega = nodeList[actualNode].a.params[0];
+            double radius = nodeList[actualNode].a.params[1];
+            double secs = nodeList[actualNode].a.params[2];
+            double look = nodeList[actualNode].a.params[3];
+            double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
+
             if(!executioner::trajectory::was_executing){
 
-                t_traj = 0;
-                executioner::trajectory::was_executing = true;
+                MavState comm = g::setPoint;
+                position state;
+                state.x = g::state.x();
+                state.y = g::state.y();
+                state.z = g::state.z();
+                state.yaw = g::state.getYaw();
+
+                double init_x = c[0] + radius;
+                double init_y = c[1];
+
+                position target;
+                target.x = init_x;
+                target.y = init_y;
+                target.z = comm.z();
+
+                double init_yaw;
+                if(look == 1) init_yaw = PI;
+                double comm_yaw;
+
+
+                if( fabs(init_x - g::state.x()) > 0.1 && fabs(init_y - g::state.y()) > 0.1 && fabs(g::state.getYaw()) < PI - PI/18 ) { // XXX Chose better condition for the yaw
+
+                    move(0.4,target,state,comm);
+                    if(look == 1) {
+                        init_yaw = PI;
+                        calculateYawIntem(init_yaw,state.yaw,comm_yaw);
+                        comm.setYaw(comm_yaw);
+                    }
+
+
+                    g::setPoint = comm;
+
+                }
+                else{
+
+                    t_traj = 0;
+                    executioner::trajectory::was_executing = true;
+
+                }
+
+
 
             }
             else{
                 t_traj += (float)1/r_auto;
-                double omega = nodeList[actualNode].a.params[0];
-                double radius = nodeList[actualNode].a.params[1];
-                double secs = nodeList[actualNode].a.params[2];
-                double look = nodeList[actualNode].a.params[3];
-                double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
-
 
                 trajectory(omega,radius,c,t_traj,secs,look);
 
@@ -336,9 +377,9 @@ void AutoThread::takeOff(){
 
 }
 
-void AutoThread::move(double alpha, position target, position robot_state){
+void AutoThread::move(double alpha, position target, position robot_state , MavState &comm){
 
-    MavState comm = g::setPoint;
+    comm = g::setPoint;
 
     //Calculate error vector
     double positionError[3] = {target.x - robot_state.x ,target.y - robot_state.y , target.z - robot_state.z};
@@ -371,9 +412,7 @@ void AutoThread::move(double alpha, position target, position robot_state){
 
     }
 
-    g::setPoint = comm;
-
-}
+ }
 
 void AutoThread::rotate(){
 

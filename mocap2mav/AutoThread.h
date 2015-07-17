@@ -14,7 +14,7 @@ public:
     ~AutoThread();
     void land(float speed, float dt, double vz, position p, position robot_state);
     void takeOff();
-    void move(double alpha, position target, position robot_state);
+    void move(double alpha, position target, position robot_state , MavState &comm);
     void rotate();
     void trajectory(double omega, double rad, double c[2], float t, int secs, float look);
     void land_plat(MavState platform, MavState robot_state,float  = 1);
