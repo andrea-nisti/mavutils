@@ -56,45 +56,39 @@ ExecThread::ExecThread(QObject *parent) :
     node1.a.params[0] = -1; //height
     nodeList.push_back(node1);
 
-    node rotate;
-    rotate.p.x = 1;
-    rotate.a.type = 'r';
-    rotate.a.params[0] = 1;
-    rotate.p.yaw = 0;
-    //nodeList.push_back(rotate);
-
     node move;
     move.a.type = 'm';
-    move.p.x = 0.8;
+    move.p.x = 0.;
     move.p.y = 0;
     move.p.z = -1;
     move.a.params[0] = 0.6;
     nodeList.push_back(move);
 
-    move.p.x = 0.8;
-    move.p.y = 0;
-    move.p.z = -1;
-    move.a.params[0] = 1;
-    nodeList.push_back(move);
+    node rotate;
+    rotate.p.x = 1;
+    rotate.p.y = 1;
+    rotate.a.type = 'r';
+    rotate.a.params[0] = 1;
+    rotate.p.yaw = PI/4;
+    nodeList.push_back(rotate);
 
-    move.p.x = 0.8;
-    move.p.y = -0.8;
-    move.p.z = -1;
-    move.a.params[0] = 0.3;
-    nodeList.push_back(move);
+    rotate.p.x = -1;
+    rotate.p.y = 0;
+    rotate.a.type = 'r';
+    rotate.a.params[0] = 0;
+    rotate.p.yaw = PI/4;
+    nodeList.push_back(rotate);
 
-    move.p.x = -0.5;
-    move.p.y = -0.5;
-    move.p.z = -1;
-    move.a.params[0] = 0.8;
-    nodeList.push_back(move);
 
-    move.p.x = 0;
-    move.p.y = 0;
-    move.p.z = -1.5;
-    move.a.params[0] = 0.4;
-    nodeList.push_back(move);
-
+    node circle;
+    circle.p.x = 0;
+    circle.p.y = 0;
+    circle.a.type = 'c';
+    circle.a.params[0] = 0.6; //Omega
+    circle.a.params[1] = 0.5; //Rad
+    circle.a.params[2] = 10;  //Secs
+    circle.a.params[3] = 1;   //look
+    nodeList.push_back(circle);
 
     node land;
     land.a.type = 'l';
@@ -198,7 +192,8 @@ void ExecThread::run(){
                 executioner::trajectory::was_executing = true;
 
             }
-            executioner::trajectory::was_executing = true;
+            executioner::trajectory::traj_sig = true;
+
             break;
         default:
             break;

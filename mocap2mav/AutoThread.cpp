@@ -149,7 +149,7 @@ void AutoThread::run(){
         }
 
         //Trajectory
-        if(true){//executioner::trajectory::traj_sig){
+        if(executioner::trajectory::traj_sig){
 
             if(!executioner::trajectory::was_executing){
 
@@ -162,13 +162,15 @@ void AutoThread::run(){
                 double omega = nodeList[actualNode].a.params[0];
                 double radius = nodeList[actualNode].a.params[1];
                 double secs = nodeList[actualNode].a.params[2];
+                double look = nodeList[actualNode].a.params[3];
                 double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
 
-                trajectory(omega,radius,c,t_traj,secs);
+
+                trajectory(omega,radius,c,t_traj,secs,look);
 
 
             }
-            qDebug() << "SP: " << g::setPoint.x() << " " << g::setPoint.y() << "timer: " << t_traj;
+
         }
 
 
@@ -372,51 +374,6 @@ void AutoThread::move(double alpha, position target, position robot_state){
 
 }
 
-void AutoThread::move2(double alpha, position target, position robot_state,float dt){
-
-    MavState comm = g::setPoint;
-
-    //Calculate error vector
-    double positionError[3] = {target.x - comm.x() ,target.y - comm.y() , target.z - comm.z()};
-    double incrementVect[3];
-
-    double dist = sqrt(pow(positionError[0],2) + pow(positionError[1],2) + pow(positionError[2],2));
-
-    //Publish
-    if(fabs(dist) <= alpha){
-        comm.setX( target.x);
-        comm.setY( target.y);
-        comm.setZ( target.z);
-    }
-
-    else if(fabs(dist) > alpha){
-
-
-
-        //Normalize
-        positionError[0] = positionError[0] / dist;
-        positionError[1] = positionError[1] / dist;
-        positionError[2] = positionError[2] / dist;
-
-        //Calculate relative motion to actual position
-        incrementVect[0] = positionError[0] * alpha * dt;
-        incrementVect[1] = positionError[1] * alpha * dt;
-        incrementVect[2] = positionError[2] * alpha * dt;
-
-        //comm.x += incrementVect[0] ?
-
-        comm.setX(comm.x() + incrementVect[0]);
-        comm.setY(comm.y() + incrementVect[1]);
-        comm.setZ(comm.z() + incrementVect[2]);
-
-    }
-
-    autoCommand.push_back(comm);
-    publish();
-
-}
-
-
 void AutoThread::rotate(){
 
     MavState commRot = g::setPoint;
@@ -455,22 +412,34 @@ void AutoThread::rotate(){
 
 }
 
-void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs){
+void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs,float look){
 
     MavState comm = g::setPoint;
 
-      // Circular trajectory
-
+    // Circular trajectory
 
     double x_sp = c[0] + rad*cos(omega * t);
     double y_sp = c[1] + rad*sin(omega * t);
-    double yawSP = atan2(c[0] - g::state.y(),c[1] - g::state.x());
-    double yawComm;
-    calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+
+    if (look == 1){
+        double yawSP = atan2(c[1] - g::state.y(),c[0] - g::state.x());
+        double yawComm;
+        calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+        comm.setYaw(yawComm);
+    }
+    else if(look == 2){
+
+        double yawSP = atan2(nodeList[actualNode].p.y - g::state.y(), nodeList[actualNode].p.x - g::state.x());
+        double yawComm;
+        calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+        comm.setYaw(yawComm);
+
+    }
+
 
     comm.setX(x_sp);
     comm.setY(y_sp);
-    comm.setYaw(yawComm);
+
 
 
     g::setPoint = comm;
@@ -483,7 +452,51 @@ void AutoThread::startMe(){
     this->start();
 }
 
+inline void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
+
+    double yawSp_h = yawSP - robotHeading;
+
+    if(yawSp_h > PI ) yawSp_h = yawSp_h - 2*PI;
+    else if (yawSp_h < -PI) yawSp_h= yawSp_h + 2*PI;
+
+    if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
+    else if(fabs(yawSp_h) > PI - PI/18){
+        //Increase yaw
+
+        yawComm = robotHeading + PI / 18 ;
+        if (yawComm > PI){
+            yawComm = yawComm - 2*PI;
+        }
+
+    }
+    else{
+
+
+        if (yawSp_h > 0){
+            //Increase yaw
+            yawComm = robotHeading + PI / 18 ;
+            if (yawComm > PI){
+               yawComm = yawComm - 2*PI;
+            }
+
+
+        }
+        else{
+            //decrease yaw
+            yawComm = robotHeading - PI / 18 ;
+             qDebug() << yawComm;
+            if (yawComm < -PI){
+              yawComm = yawComm + 2*PI;
+
+            }
+        }
+
+
+    }
+    qDebug() << "heading: " << robotHeading <<"Yaw SP: " << yawSP << "Yaw SP_h: " <<yawSp_h << "yawcomm " << yawComm;
+
+}
 
 
 

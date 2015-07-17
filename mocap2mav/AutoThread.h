@@ -15,9 +15,8 @@ public:
     void land(float speed, float dt, double vz, position p, position robot_state);
     void takeOff();
     void move(double alpha, position target, position robot_state);
-    void move2(double alpha, position target, position robot_state, float dt);
     void rotate();
-    void trajectory(double omega, double rad, double c[2], float t, int secs);
+    void trajectory(double omega, double rad, double c[2], float t, int secs, float look);
     void land_plat(MavState platform, MavState robot_state,float  = 1);
 signals:
     void publish();
