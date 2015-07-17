@@ -44,6 +44,7 @@ namespace executioner{
     namespace move {
        extern bool move_sig;
        extern bool move_done;
+       extern bool was_executing;
 
     }
 

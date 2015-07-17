@@ -127,6 +127,7 @@ void AutoThread::run(){
 
             float alpha = nodeList[actualNode].a.params[0];
 
+
             position state;
             state.x = g::state.x();
             state.y = g::state.y();

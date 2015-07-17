@@ -23,6 +23,7 @@ namespace executioner{
     namespace move{
        bool move_sig;
        bool move_done;
+       bool was_executing;
     }
     namespace rotate{
        bool rotate_sig;
@@ -42,7 +43,7 @@ std::vector<node> nodeList;
 int actualNode = 0;
 int r_exec = 120; //Hz
 
-
+int move_count = 0;
 bool checkActions(char a);
 void signalsReset();
 bool can_run = false;
@@ -122,6 +123,7 @@ void ExecThread::run(){
 
     QTime rate;
 
+
     qDebug() << "executioner from: " << QThread::currentThreadId();
 
     signalsReset();
@@ -144,6 +146,11 @@ void ExecThread::run(){
 
         //MOVE
         case 'm':
+            if(!executioner::move::was_executing){
+                move_count = nodeList[actualNode].a.params[1];
+                executioner::move::was_executing = true;
+
+            }
             executioner::move::move_sig = true;
             break;
 
@@ -217,7 +224,7 @@ void ExecThread::run(){
 
 }
 
-int move_count = 0;
+
 bool checkActions(char a){
 
     switch (a) {
@@ -293,6 +300,7 @@ void signalsReset(){
 
     executioner::move::move_done = false;
     executioner::move::move_sig = false;
+    executioner::move::was_executing = true;
 
     executioner::rotate::rotate_done = false;
     executioner::rotate::rotate_sig = false;
