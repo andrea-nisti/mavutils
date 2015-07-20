@@ -42,16 +42,10 @@ int main(int argc, char *argv[])
     QObject::connect(&manual,SIGNAL(publish()),&commander,SLOT(checkCommands()));
     QObject::connect(&autom,SIGNAL(publish()),&commander,SLOT(checkCommands()));
 
-
-
     qDebug() << "MAIN FROM: " << QThread::currentThreadId();
-
-
 
     QObject::connect(&mocap, SIGNAL(dataUpdate()), &positionDispatcher, SLOT(sendPosition()));
     QObject::connect(&positionDispatcher, SIGNAL(finished()), &a, SLOT(quit()));
-
-
 
     return a.exec();
 }

@@ -24,7 +24,8 @@ SOURCES += \
     AutoThread.cpp \
     ExecThread.cpp \
     Automatic.cpp \
-    Executioner.cpp
+    Executioner.cpp \
+    utils.cpp
 
 
 HEADERS += \
