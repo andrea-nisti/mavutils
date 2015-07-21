@@ -35,7 +35,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
         else{
             //decrease yaw
             yawComm = robotHeading - PI / 18 ;
-             qDebug() << yawComm;
+
             if (yawComm < -PI){
               yawComm = yawComm + 2*PI;
 
@@ -44,7 +44,6 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
 
     }
-    qDebug() << "heading: " << robotHeading <<"Yaw SP: " << yawSP << "Yaw SP_h: " <<yawSp_h << "yawcomm " << yawComm;
 
 }
 

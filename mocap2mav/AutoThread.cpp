@@ -77,7 +77,6 @@ void AutoThread::run(){
     double e_y = 0;
     double e_z = 0;
     float vy_platform = 0;
-
     rate.start();
 
     while (true) {
@@ -160,30 +159,33 @@ void AutoThread::run(){
             double look = nodeList[actualNode].a.params[3];
             double c[2] = {nodeList[actualNode].p.x,nodeList[actualNode].p.y};
 
-            if(!executioner::trajectory::was_executing){
+            MavState comm = g::setPoint;
+            position state;
+            state.x = g::state.x();
+            state.y = g::state.y();
+            state.z = g::state.z();
+            state.yaw = g::state.getYaw();
 
-                MavState comm = g::setPoint;
-                position state;
-                state.x = g::state.x();
-                state.y = g::state.y();
-                state.z = g::state.z();
-                state.yaw = g::state.getYaw();
+            double init_x = c[0] + radius;
+            double init_y = c[1];
 
-                double init_x = c[0] + radius;
-                double init_y = c[1];
+            position target;
+            target.x = init_x;
+            target.y = init_y;
+            target.z = comm.z();
 
-                position target;
-                target.x = init_x;
-                target.y = init_y;
-                target.z = comm.z();
-
-                double init_yaw;
-                if(look == 1) init_yaw = PI;
-                double comm_yaw;
+            double init_yaw;
+            if(look == 1) init_yaw = PI;
+            double comm_yaw;
 
 
-                if( fabs(init_x - g::state.x()) > 0.1 && fabs(init_y - g::state.y()) > 0.1 && fabs(g::state.getYaw()) < PI - PI/18 ) { // XXX Chose better condition for the yaw
 
+
+            if(false){//!executioner::trajectory::ready){
+
+                bool check = fabs(init_x - g::state.x()) < 0.15 && fabs(init_y - g::state.y()) < 0.15;
+                if(!check){ // XXX Chose better condition for the yaw
+                    //qDebug() << check << " ";
                     calculatePositionInterm(0.4,target,state,comm);
                     if(look == 1) {
                         init_yaw = PI;
@@ -191,14 +193,12 @@ void AutoThread::run(){
                         comm.setYaw(comm_yaw);
                     }
 
-
                     g::setPoint = comm;
-
                 }
                 else{
 
                     t_traj = 0;
-                    executioner::trajectory::was_executing = true;
+                    executioner::trajectory::ready = true;
 
                 }
 
@@ -207,8 +207,8 @@ void AutoThread::run(){
             }
             else{
                 t_traj += (float)1/r_auto;
-
-                trajectory(omega,radius,c,t_traj,secs,look);
+                //qDebug() <<  "calculating traj ";
+                trajectory(omega,radius,c,t_traj,secs,look,state);
 
 
             }
@@ -425,7 +425,7 @@ void AutoThread::rotate(){
 
 }
 
-void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs,float look){
+void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs,float look,position robot_state){
 
     MavState comm = g::setPoint;
 
@@ -434,21 +434,12 @@ void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs
     double x_sp = c[0] + rad*cos(omega * t);
     double y_sp = c[1] + rad*sin(omega * t);
 
-    if (look == 1){
-        double yawSP = atan2(c[1] - g::state.y(),c[0] - g::state.x());
-        double yawComm;
-        calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
-        comm.setYaw(yawComm);
-    }
-    else if(look == 2){
-
-        double yawSP = atan2(nodeList[actualNode].p.y - g::state.y(), nodeList[actualNode].p.x - g::state.x());
-        double yawComm;
-        calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
-        comm.setYaw(yawComm);
-
-    }
-
+    //if (look == 1){
+        double yawSP = atan2( - robot_state.y, - robot_state.x);
+        //double yawComm;
+        //calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+        comm.setYaw(yawSP);
+    //}
 
     comm.setX(x_sp);
     comm.setY(y_sp);

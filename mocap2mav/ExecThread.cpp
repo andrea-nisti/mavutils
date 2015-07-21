@@ -35,6 +35,7 @@ namespace executioner{
        bool traj_done;
        bool was_executing;
        double traj_time;
+       bool ready;
     }
 
 }
@@ -65,27 +66,11 @@ ExecThread::ExecThread(QObject *parent) :
     move.a.params[0] = 0.6;
     nodeList.push_back(move);
 
-    node rotate;
-    rotate.p.x = 1;
-    rotate.p.y = 1;
-    rotate.a.type = 'r';
-    rotate.a.params[0] = 1;
-    rotate.p.yaw = PI/4;
-    nodeList.push_back(rotate);
-
-    rotate.p.x = -1;
-    rotate.p.y = 0;
-    rotate.a.type = 'r';
-    rotate.a.params[0] = 0;
-    rotate.p.yaw = PI/4;
-    nodeList.push_back(rotate);
-
-
     node circle;
     circle.p.x = 0;
     circle.p.y = 0;
     circle.a.type = 'c';
-    circle.a.params[0] = 0.6; //Omega
+    circle.a.params[0] = 0.5; //Omega
     circle.a.params[1] = 0.5; //Rad
     circle.a.params[2] = 10;  //Secs
     circle.a.params[3] = 1;   //look
@@ -309,6 +294,7 @@ void signalsReset(){
     executioner::trajectory::traj_sig = false;
     executioner::trajectory::was_executing = false;
     executioner::trajectory::traj_time = 0;
+    executioner::trajectory::ready = false;
 
 }
 

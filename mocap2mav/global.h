@@ -59,6 +59,7 @@ namespace executioner{
       extern bool traj_done;
       extern bool was_executing;
       extern double traj_time;
+      extern bool ready;
     }
 
 
