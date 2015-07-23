@@ -12,7 +12,7 @@ int land_wait = 2; // Seconds
 int rot_wait = 3;
 float move_alpha = 0.6;
 
-float land_gain = 0.3;
+float land_gain = 0.4;
 
 //mobile plat gains
 

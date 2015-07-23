@@ -17,17 +17,22 @@ ManualThread::ManualThread(QObject *parent) :
 
 
 
-double omega = 0.3;
+double omega = 0.4;
 QTime t;
 QTime rate;
 int r = 10; //Hz
 int milli;
 float a = 0.8;
-double x_sp,y_sp,yaw;
+float b = 2;
+float sp_thre = 0.2;
+double x_sp,y_sp,yaw_sp;
+double c[2] = {0.2,0};
+
+
 void ManualThread::run(){
 
 
-    g::setPoint.setPosition(a + 0.4, 0, -1);
+    g::setPoint.setPosition(c[0], c[1], -1);
     sleep(3);
 
 
@@ -36,22 +41,35 @@ void ManualThread::run(){
     rate.start();
 
 
-    while (!m_stop && t.elapsed() < 50000) {
+    while (!m_stop && t.elapsed() < 80000) {
 
         rate.restart();
-
+        MavState comm = g::setPoint;
+        double yaw_comm;
         // Lemniscate trajectory
         milli = t.elapsed();
 
-        float sin_ = sin(omega * milli / 1000);
-        float cos_ = cos(omega * milli / 1000);
+        float sin_ = sin(PI/2 + omega * milli / 1000);
+        float cos_ = cos(PI/2 + omega * milli / 1000);
 
         float factor = cos_ / (pow(sin_, 2) + 1);
 
-        x_sp = (0.4 + a * factor) * 1.2;
-        y_sp = (a * sin_ * factor) * 3;
+        x_sp = c[0] + (a * factor);
+        y_sp = c[1] + (b * sin_ * factor);
+/*
+        if(x_sp > 0) {
+            yaw_sp = atan2( - g::state.y(),a/2 - g::state.x());
+        }
+        else if (x_sp <= 0 ){
+            yaw_sp = atan2( - g::state.y(),-a/2 - g::state.x());
+        }
+*/
+        yaw_sp = atan2( c[1] - g::state.y(),c[0] - g::state.x());
+        calculateYawIntem(yaw_sp,g::state.getYaw(),yaw_comm);
 
-        g::setPoint.setPosition(x_sp, y_sp , -1);
+        g::setPoint.setX(x_sp);
+        g::setPoint.setY(y_sp);
+        g::setPoint.setYaw(yaw_comm);
 
         qDebug() << "set point: " << g::setPoint.x() << " " << g::setPoint.y() << " t: " << sin_;
 

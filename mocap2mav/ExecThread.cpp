@@ -58,9 +58,16 @@ ExecThread::ExecThread(QObject *parent) :
     node1.a.params[0] = -1; //height
     nodeList.push_back(node1);
 
+    node rotate;
+    rotate.a.type = 'r';
+    rotate.a.params[0] = 1;
+    rotate.p.yaw = PI;
+    nodeList.push_back(rotate);
+
+
     node move;
     move.a.type = 'm';
-    move.p.x = 0.;
+    move.p.x = 0.9;
     move.p.y = 0;
     move.p.z = -1;
     move.a.params[0] = 0.6;
@@ -71,9 +78,9 @@ ExecThread::ExecThread(QObject *parent) :
     circle.p.y = 0;
     circle.a.type = 'c';
     circle.a.params[0] = 0.5; //Omega
-    circle.a.params[1] = 0.5; //Rad
-    circle.a.params[2] = 10;  //Secs
-    circle.a.params[3] = 1;   //look
+    circle.a.params[1] = 0.7; //Rad
+    circle.a.params[2] = 12;  //Secs
+    circle.a.params[3] = 0;   //look
     nodeList.push_back(circle);
 
     node land;
@@ -87,6 +94,7 @@ ExecThread::ExecThread(QObject *parent) :
         can_run = true;
     }
     else{
+
         qDebug() << "WARNING, empty list";
         can_run = false;
     }

@@ -120,12 +120,13 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
+            //wait to recenter
             target.y = nodeList[actualNode].p.y;
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
 
             float alpha = nodeList[actualNode].a.params[0];
-
+            float move_wait = nodeList[actualNode].a.params[1];
 
             position state;
             state.x = g::state.x();
@@ -177,41 +178,9 @@ void AutoThread::run(){
             double init_yaw;
             if(look == 1) init_yaw = PI;
             double comm_yaw;
+            t_traj += (float)1/r_auto;
+            trajectory(omega,radius,c,t_traj,secs,look,state);
 
-
-
-
-            if(false){//!executioner::trajectory::ready){
-
-                bool check = fabs(init_x - g::state.x()) < 0.15 && fabs(init_y - g::state.y()) < 0.15;
-                if(!check){ // XXX Chose better condition for the yaw
-                    //qDebug() << check << " ";
-                    calculatePositionInterm(0.4,target,state,comm);
-                    if(look == 1) {
-                        init_yaw = PI;
-                        calculateYawIntem(init_yaw,state.yaw,comm_yaw);
-                        comm.setYaw(comm_yaw);
-                    }
-
-                    g::setPoint = comm;
-                }
-                else{
-
-                    t_traj = 0;
-                    executioner::trajectory::ready = true;
-
-                }
-
-
-
-            }
-            else{
-                t_traj += (float)1/r_auto;
-                //qDebug() <<  "calculating traj ";
-                trajectory(omega,radius,c,t_traj,secs,look,state);
-
-
-            }
 
         }
 
@@ -278,8 +247,8 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
             }
             else speed = 0;
-            sP.x = error.x * land_gain * 0.7 + p.x;
-            sP.y = error.y * land_gain * 0.7 + p.y;
+            sP.x = error.x * land_gain * 0.9 + p.x;
+            sP.y = error.y * land_gain * 0.9 + p.y;
 
             comm.setX(sP.x);
             comm.setY(sP.y);
@@ -422,7 +391,6 @@ void AutoThread::rotate(){
         }
     }
 
-
 }
 
 void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs,float look,position robot_state){
@@ -431,20 +399,18 @@ void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs
 
     // Circular trajectory
 
-    double x_sp = c[0] + rad*cos(omega * t);
-    double y_sp = c[1] + rad*sin(omega * t);
+    double x_sp = 0.2 + rad*cos(omega * t);
+    double y_sp = rad*sin(omega * t);
 
     //if (look == 1){
-        double yawSP = atan2( - robot_state.y, - robot_state.x);
-        //double yawComm;
-        //calculateYawIntem(yawSP,g::state.getYaw(),yawComm);
+        double yawSP = atan2( -g::state.y(),0.2 - g::state.x());
+        double yawComm;
+        //calculateYawIntem(yawSP,robot_state.yaw,yawComm);
         comm.setYaw(yawSP);
     //}
 
     comm.setX(x_sp);
     comm.setY(y_sp);
-
-
 
     g::setPoint = comm;
 

@@ -88,8 +88,8 @@ ManualControl::ManualControl(QObject *parent) :
 void ManualControl::setHome(){
 
     g::setPoint.setPosition(0, 0 , -1);
-    g::setPoint.setYaw(0);
-    qDebug() << "HOMED: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z();
+    g::setPoint.setYaw(PI);
+    qDebug() << "HOMED: " << g::setPoint.x() << " " << g::setPoint.y() << " " << g::setPoint.z() <<"yaw: "<<g::setPoint.yaw();
 
 }
 
