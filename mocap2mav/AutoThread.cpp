@@ -126,7 +126,6 @@ void AutoThread::run(){
             target.yaw = nodeList[actualNode].p.yaw;
 
             float alpha = nodeList[actualNode].a.params[0];
-            float move_wait = nodeList[actualNode].a.params[1];
 
             position state;
             state.x = g::state.x();
@@ -221,7 +220,7 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
     float z = comm.z();
 
     bool descend_valid = false;
-    if(fabs(vz) < 0.01 && robot_state.z - offset >= - 0.10){
+    if(fabs(vz) < 0.01 && (robot_state.z - offset) >= - 0.10){
 
 
         if(++land_count == land_wait * r_auto) {
@@ -247,8 +246,9 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
 
             }
             else speed = 0;
-            sP.x = error.x * land_gain * 0.9 + p.x;
-            sP.y = error.y * land_gain * 0.9 + p.y;
+
+            sP.x = error.x * land_gain * 0.8 + p.x;
+            sP.y = error.y * land_gain * 0.8 + p.y;
 
             comm.setX(sP.x);
             comm.setY(sP.y);

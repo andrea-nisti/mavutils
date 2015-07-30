@@ -51,41 +51,59 @@ bool can_run = false;
 ExecThread::ExecThread(QObject *parent) :
     QThread(parent)
 {
-    //fill nodelist
+
+    // Fill Node list
 
     node node1;
     node1.a.type = 't';
-    node1.a.params[0] = -1; //height
+    node1.a.params[0] = -1.4; //height
     nodeList.push_back(node1);
+
+    node move;
+    move.a.type = 'm';
+    move.p.x = 1.25;
+    move.p.y = 1.01;
+    move.p.z = -1.5;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 3;
+    nodeList.push_back(move);
 
     node rotate;
     rotate.a.type = 'r';
     rotate.a.params[0] = 1;
-    rotate.p.yaw = PI;
+    rotate.p.yaw = 0;
     nodeList.push_back(rotate);
-
-
-    node move;
-    move.a.type = 'm';
-    move.p.x = 0.9;
-    move.p.y = 0;
-    move.p.z = -1;
-    move.a.params[0] = 0.6;
-    nodeList.push_back(move);
-
-    node circle;
-    circle.p.x = 0;
-    circle.p.y = 0;
-    circle.a.type = 'c';
-    circle.a.params[0] = 0.5; //Omega
-    circle.a.params[1] = 0.7; //Rad
-    circle.a.params[2] = 12;  //Secs
-    circle.a.params[3] = 0;   //look
-    nodeList.push_back(circle);
 
     node land;
     land.a.type = 'l';
-    land.a.params[0] = 2; //height velocity
+    land.a.params[0] = 5; //height velocity
+    land.a.params[1] = -0.79; // offset
+    nodeList.push_back(land);
+
+    nodeList.push_back(node1);
+
+    move.p.x = -0.8;
+    move.p.y = 1;
+    move.p.z = -1;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 3;
+    nodeList.push_back(move);
+
+    move.p.x = -0.5;
+    move.p.y = 0;
+    move.p.z = -0.8;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 0;
+    nodeList.push_back(move);
+
+    move.p.x = 0.5;
+    move.p.y = -0.5;
+    move.p.z = -0.8;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 0;
+    nodeList.push_back(move);
+
+    land.a.params[0] = 4; //height velocity
     land.a.params[1] = 0; // offset
     nodeList.push_back(land);
 
@@ -227,8 +245,8 @@ bool checkActions(char a){
         if(fabs(g::state.x() - nodeList[actualNode].p.x) < 0.15 &&
            fabs(g::state.y() - nodeList[actualNode].p.y) < 0.15 &&
            fabs(g::state.z() - nodeList[actualNode].p.z) < 0.15 ){
-
-           if(++move_count == 4 * 120){move_count = 0; executioner::move::move_done = true;}
+           float move_wait = nodeList[actualNode].a.params[1];
+           if(++move_count >= move_wait * r_exec){move_count = 0; executioner::move::move_done = true;}
 
         }
         else{
@@ -312,5 +330,163 @@ void ExecThread::startMe(){
 
 
 
+/*  TABLE LANDING
+    node node1;
+    node1.a.type = 't';
+    node1.a.params[0] = -1.4; //height
+    nodeList.push_back(node1);
+
+    node rotate;
+    rotate.a.type = 'r';
+    rotate.p.x = 0.8;
+    rotate.p.y = 0.8;
+    rotate.a.params[0] = 0;
+    rotate.p.yaw = PI;
+    nodeList.push_back(rotate);
+
+    node move;
+    move.a.type = 'm';
+    move.p.x = 1.2;
+    move.p.y = 1.02;
+    move.p.z = -1.5;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 5;
+    nodeList.push_back(move);
+
+    rotate.a.params[0] = 1;
+    rotate.p.yaw = 0;
+    nodeList.push_back(rotate);
+
+    node land;
+    land.a.type = 'l';
+    land.a.params[0] = 5; //height velocity
+    land.a.params[1] = -0.79; // offset
+    nodeList.push_back(land);
+
+    nodeList.push_back(node1);
+
+    move.p.x = -0.8;
+    move.p.y = 1;
+    move.p.z = -1;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 3;
+    nodeList.push_back(move);
+
+    move.p.x = -0.5;
+    move.p.y = 0;
+    move.p.z = -0.8;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 0;
+    nodeList.push_back(move);
+
+    move.p.x = 0.5;
+    move.p.y = -0.5;
+    move.p.z = -0.8;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 0;
+    nodeList.push_back(move);
+
+    land.a.params[0] = 4; //height velocity
+    land.a.params[1] = 0; // offset
+    nodeList.push_back(land);
+
+*/
 
 
+
+
+/* Circle
+
+node node1;
+node1.a.type = 't';
+node1.a.params[0] = -1; //height
+nodeList.push_back(node1);
+
+node rotate;
+rotate.a.type = 'r';
+rotate.a.params[0] = 1;
+rotate.p.yaw = PI;
+nodeList.push_back(rotate);
+
+
+node move;
+move.a.type = 'm';
+move.p.x = 0.5;
+move.p.y = 0;
+move.p.z = -1;
+move.a.params[0] = 0.6;
+move.a.params[1] = 1;
+nodeList.push_back(move);
+
+node circle;
+circle.p.x = 0;
+circle.p.y = 0;
+circle.a.type = 'c';
+circle.a.params[0] = 0.5; //Omega
+circle.a.params[1] = 0.5; //Rad
+circle.a.params[2] = 8;  //Secs
+circle.a.params[3] = 0;   //look
+nodeList.push_back(circle);
+
+//Circle done
+move.p.x = -0.8;
+move.p.y = -0.8;
+move.p.z = -0.8;
+move.a.params[0] = 0.3;
+move.a.params[1] = 0;
+nodeList.push_back(move);
+
+move.p.x = 0.8;
+move.p.y = -0.6;
+move.p.z = -1.3;
+move.a.params[0] = 0.8;
+move.a.params[1] = 0;
+nodeList.push_back(move);
+
+move.p.x = 0.8;
+move.p.y = 0.8;
+move.p.z = -1;
+move.a.params[0] = 0.8;
+move.a.params[1] = 0;
+nodeList.push_back(move);
+
+move.p.x = 0;
+move.p.y = 0;
+move.p.z = -0.5;
+move.a.params[0] = 0.8;
+move.a.params[1] = 0;
+nodeList.push_back(move);
+
+move.p.x = -0.8;
+move.p.y = 1.1;
+move.p.z = -0.8;
+move.a.params[0] = 0.3;
+move.a.params[1] = 1;
+nodeList.push_back(move);
+
+rotate.p.x = -1.2;
+rotate.p.y = 1.5;
+rotate.a.params[0] = 0;
+rotate.p.yaw = 0;
+nodeList.push_back(rotate);
+
+move.p.x = -0.7;
+move.p.y = 1.1;
+move.p.z = -1.3;
+move.a.params[0] = 0.8;
+move.a.params[1] = 6;
+nodeList.push_back(move);
+
+move.p.x = 1.2;
+move.p.y = 1.1;
+move.p.z = -1;
+move.a.params[0] = 0.6;
+move.a.params[1] = 2;
+nodeList.push_back(move);
+
+node land;
+land.a.type = 'l';
+land.a.params[0] = 4; //height velocity
+land.a.params[1] = 0; // offset
+nodeList.push_back(land);
+*/

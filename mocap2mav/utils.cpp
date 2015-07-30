@@ -10,11 +10,11 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
     if(yawSp_h > PI ) yawSp_h = yawSp_h - 2*PI;
     else if (yawSp_h < -PI) yawSp_h= yawSp_h + 2*PI;
 
-    if (fabs(yawSp_h) <= PI/18) yawComm = yawSP;
+    if (fabs(yawSp_h) <= PI/10) yawComm = yawSP;
     else if(fabs(yawSp_h) > PI - PI/18){
         //Increase yaw
 
-        yawComm = robotHeading + PI / 18 ;
+        yawComm = robotHeading + PI / 10 ;
         if (yawComm > PI){
             yawComm = yawComm - 2*PI;
         }
@@ -25,7 +25,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
         if (yawSp_h > 0){
             //Increase yaw
-            yawComm = robotHeading + PI / 18 ;
+            yawComm = robotHeading + PI / 10 ;
             if (yawComm > PI){
                yawComm = yawComm - 2*PI;
             }
@@ -34,7 +34,7 @@ void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
         }
         else{
             //decrease yaw
-            yawComm = robotHeading - PI / 18 ;
+            yawComm = robotHeading - PI / 10 ;
 
             if (yawComm < -PI){
               yawComm = yawComm + 2*PI;
