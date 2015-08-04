@@ -109,7 +109,7 @@ void ManualThread::run(){
             qDebug() << "looking center: "<< c_actual;
 
         }
-        qDebug() << "set point: " << sp_global[0] << " " << g::setPoint.y() << " " << g::setPoint.z() <<" "<< c0_glob[0] <<" "<< c1_glob[0];
+        //qDebug() << "set point: " << sp_global[0] << " " << g::setPoint.y() << " " << g::setPoint.z() <<" "<< c0_glob[0] <<" "<< c1_glob[0];
         msleep(1000/r - (float)rate.elapsed());
 
     }

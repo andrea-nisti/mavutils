@@ -25,6 +25,8 @@ float t_traj = 0;
 
 
 std::ofstream output;
+std::ofstream output_land;
+
 AutoThread::AutoThread(QObject *parent) :
     QThread(parent)
 {
@@ -48,6 +50,7 @@ AutoThread::AutoThread(QObject *parent) :
     str = str + "/" + s_file.toStdString();
 
     output.open(str);
+    output_land.open("land_0_0.txt",std::ios_base::app);
 
 }
 
@@ -55,6 +58,7 @@ AutoThread::~AutoThread()
 
 {
     output.close();
+    output_land.close();
 
 }
 
@@ -120,7 +124,6 @@ void AutoThread::run(){
             position target;
 
             target.x = nodeList[actualNode].p.x;
-            //wait to recenter
             target.y = nodeList[actualNode].p.y;
             target.z = nodeList[actualNode].p.z;
             target.yaw = nodeList[actualNode].p.yaw;
@@ -195,7 +198,7 @@ void AutoThread::run(){
             " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
             vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
             roll<<" "<<pitch << " " << yaw                       //Attitude
-            <<" "<<plat_error[0]<<" "<<plat_error[1];            //platform allignement error
+            <<" "<<plat_error[0]<<" "<<plat_error[1]<<" "<<g::setPoint.yaw();            //platform allignement error
 
         output << ";\n";
 
@@ -226,6 +229,7 @@ void AutoThread::land(float speed, float dt,double vz, position p , position rob
         if(++land_count == land_wait * r_auto) {
 
             land_count = 0;
+            output_land << g::state.x()<<" "<<g::state.y()<<";\n";
             executioner::land::landed = true;
 
         }
@@ -399,11 +403,11 @@ void AutoThread::trajectory(double omega,double rad,double c[2],float t,int secs
 
     // Circular trajectory
 
-    double x_sp = 0.2 + rad*cos(omega * t);
-    double y_sp = rad*sin(omega * t);
+    double x_sp =rad*cos(omega * t);
+    double y_sp =rad*sin(omega * t);
 
     //if (look == 1){
-        double yawSP = atan2( -g::state.y(),0.2 - g::state.x());
+        double yawSP = atan2( - g::state.y(), - g::state.x());
         double yawComm;
         //calculateYawIntem(yawSP,robot_state.yaw,yawComm);
         comm.setYaw(yawSP);

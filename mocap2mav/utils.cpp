@@ -1,6 +1,9 @@
 #include "utils.h"
 #include <cmath>
 #include "QDebug"
+#include "global.h"
+
+
 
 void calculateYawIntem(double yawSP,double robotHeading,double &yawComm){
 
@@ -75,7 +78,7 @@ void calculatePositionInterm(double alpha, position target, position robot_state
 
         comm.setX(robot_state.x + incrementVect[0]);
         comm.setY(robot_state.y + incrementVect[1]);
-        comm.setZ(target.z); //robot_state.z + incrementVect[2]);
+        comm.setZ(target.z); //robot_state.z + incrementVect[2])
 
     }
 

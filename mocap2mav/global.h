@@ -45,7 +45,7 @@ namespace executioner{
        extern bool move_sig;
        extern bool move_done;
        extern bool was_executing;
-
+       extern bool keep_sp_still;
     }
 
     namespace rotate{
