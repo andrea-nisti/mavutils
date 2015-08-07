@@ -9,6 +9,7 @@ Commander::Commander(QObject *parent) :
     commanderThr.start();
 }
 
+
 void Commander::checkCommands(){
 
     //priority check

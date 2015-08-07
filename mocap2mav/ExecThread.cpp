@@ -54,6 +54,10 @@ ExecThread::ExecThread(QObject *parent) :
 {
 
 
+    // Fill Node list
+
+    // Fill Node list
+
     node node1;
     node1.a.type = 't';
     node1.a.params[0] = -1; //height
@@ -61,39 +65,11 @@ ExecThread::ExecThread(QObject *parent) :
 
     node move;
     move.a.type = 'm';
-    move.p.x = 0.8;
-    move.p.y = -0.8;
-    move.p.z = -1;
-    move.a.params[0] = 0.3;
-    move.a.params[1] = 5;
-    nodeList.push_back(move);
-
-    move.p.x = 0.8;
-    move.p.y = 0.8;
-    move.p.z = -1;
-    move.a.params[0] = 0.3;
-    move.a.params[1] = 5;
-    nodeList.push_back(move);
-
-    move.p.x = -0.8;
-    move.p.y =  0.8;
-    move.p.z = -1;
-    move.a.params[0] = 0.3;
-    move.a.params[1] = 5;
-    nodeList.push_back(move);
-
-    move.p.x = -0.8;
-    move.p.y = -0.8;
-    move.p.z = -1;
-    move.a.params[0] = 0.3;
-    move.a.params[1] = 5;
-    nodeList.push_back(move);
-
     move.p.x = 0;
     move.p.y = 0;
-    move.p.z = -1;
-    move.a.params[0] = 0.3;
-    move.a.params[1] = 5;
+    move.p.z = -0.8;
+    move.a.params[0] = 0.6;
+    move.a.params[1] = 2;
     nodeList.push_back(move);
 
     node land;
@@ -174,7 +150,7 @@ void ExecThread::run(){
                 executioner::land::was_executing = true;
             }
 
-            executioner::land::land_sig = true;
+            executioner::land::land_plat_sig = true;
             break;
 
         //TAKEOFF

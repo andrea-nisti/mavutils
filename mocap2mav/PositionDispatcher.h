@@ -4,7 +4,7 @@
 #include <QtSerialPort>
 #include <QTime>
 #include <stdint.h>
-
+#include<QMutex>
 #include <mavlink/common/mavlink.h>
 
 
@@ -31,4 +31,5 @@ private:
     void setSp(double x, double y);
     void _sendMavlinkMessage(mavlink_message_t *msg);
 
+    QMutex m;
 };

@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QVector>
 #include <QTextStream>
-
+#include <QMutex>
 #include "PositionDispatcher.h"
 #include "common/MavUtils.h"
 #include "MavState.h"
@@ -81,6 +81,7 @@ void PositionDispatcher::sendPosition()
 //                             ;
 
 
+        m.lock();
 
         mavlink_msg_vicon_position_estimate_pack(
                     1,
@@ -94,6 +95,7 @@ void PositionDispatcher::sendPosition()
                     0.5, //Rate gain
 
                     g::setPoint.yaw()); //rad
+         m.unlock();
 
          _sendMavlinkMessage(&msg2);
          //qDebug() << "Sent position target";

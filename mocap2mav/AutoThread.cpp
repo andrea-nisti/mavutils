@@ -15,13 +15,17 @@
 #include <string>
 #define PI 3.141592653589
 
-int land_count = 0;int rot_count = 0;int circle_count = 0; int descent_count = 0;
+int land_count = 0;int rot_count = 0;int circle_count = 0; int land_plat_count = 0;
 void calculateYawIntem(double yawSP, double robotHeading, double &yawComm);
-float plat_error[2] = {0,0};
 float error_int = 0;
 float error_int_x = 0;
 float error_int_y = 0;
 float t_traj = 0;
+bool  try_land = false;
+bool start_try_land = false;
+bool landing = false;
+
+float m = 2.7; //descending profile in mobile plat landing
 
 
 std::ofstream output;
@@ -198,7 +202,7 @@ void AutoThread::run(){
             " "<<e_x<<" "<<e_y<<" "<<e_z<<" "<<                  //Position error
             vx <<" "<<vy<<" "<<vz<<" "<<                         //Velocity
             roll<<" "<<pitch << " " << yaw                       //Attitude
-            <<" "<<plat_error[0]<<" "<<plat_error[1]<<" "<<g::setPoint.yaw();            //platform allignement error
+            <<" "<<g::platform.x()<<" "<<g::platform.y()<<" "<<g::setPoint.yaw();            //platform allignement error
 
         output << ";\n";
 
@@ -294,21 +298,34 @@ void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha){
 
     MavState comm = g::setPoint;
 
-    float position_error[2] = {platform.x() - robot_state.x(),platform.y() - robot_state.y() };
+    if( ++land_plat_count >= 15 * r_auto) start_try_land = true; //start descending after 10 seconds
+    float x_err = platform.x() - robot_state.x();
+    float y_err = platform.y() - robot_state.y();
 
-    error_int_x += position_error[0];
-    error_int_y += position_error[1];
+    error_int_x += x_err;
+    error_int_y += y_err;
 
-    float x_sp = platform.x() + kp * position_error[0] + ki * error_int_x;
-    float y_sp = platform.y() + kp * position_error[1] + ki* error_int_y;
+    float x_sp = platform.x() + kp * x_err + ki * error_int_x;
+    float y_sp = platform.y() + kp * y_err + ki * error_int_y;
 
     double dist = sqrt(pow(x_sp - robot_state.x(),2) + pow(y_sp - robot_state.y(),2));
+    double dist_plat = sqrt(pow(platform.x(),2) + pow(platform.y(),2));
+
+    if (fabs(dist_plat) > 1){
+
+        //reset integrals ??
+
+        if(start_try_land) try_land = false;
+
+    }
+    else{
+        try_land = true;
+    }
 
     if (true){//dist <= alpha){
 
-        //comm.setX(x_sp);
         comm.setY(y_sp);
-        comm.setX((float)0.5);
+        comm.setX(x_sp);
 
     }
     else{
@@ -328,9 +345,52 @@ void AutoThread::land_plat(MavState platform,MavState robot_state,float alpha){
 
     }
 
+
+
+    //Landing procedure
+
+    float z = g::setPoint.z();
+    float q;
+
+    // abs = robot offset + m * error + q - platform height
+    //we subtract platform height because z must be positive and plat_height is negative
+    q = 0.1 - m * 0.05;
+
+    z = m * fabs(x_err) - 0.008 - platform.z() + robot_height;
+
+    //Saturations
+
+    if(z >= 0.8) z = 0.8;
+
+    if(!landing){
+        if(z <= - platform.z() + robot_height + 0.1) z = - platform.z() + robot_height + 0.1;
+    }
+
+
+    //Land
+    if(fabs(x_err) < 0.04 && fabs(y_err) < 0.04 && fabs(robot_state.z()) <  - platform.z() + robot_height + 0.15){
+
+        // point of no return
+        landing = true;
+
+        z = -100; // go very down !!!!!
+
+    }
+
+    z = -z;
+
+    if(try_land == true) comm.setZ(z);
+    else comm.setZ(-0.8); // go up
+
+
+
+
+    g::setPoint = comm;
+
+    /*
     autoCommand.push_back(comm);
     publish();
-
+    */
 
 }
 

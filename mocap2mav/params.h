@@ -16,8 +16,8 @@ float land_gain = 0.35;
 
 //mobile plat gains
 
-float kp = 0.1;
-float ki = 0.009;
+float kp = 0.008;
+float ki = 0.03;
 
 
 
