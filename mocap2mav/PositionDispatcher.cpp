@@ -75,10 +75,10 @@ void PositionDispatcher::sendPosition()
 
 
 
-//        qDebug() << "Sent now     :     " << g::state.x() << "\t"
-//                             <<  g::state.y() << "\t"
-//                             << g::state.z()<< "\t"
-//                             ;
+        qDebug() << "Sent now     :     " << g::state.x() << "\t"
+                            <<  g::state.y() << "\t"
+                             << g::state.z()<< "\t"
+                             ;
 
 
         m.lock();
